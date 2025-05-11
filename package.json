@@ -1,0 +1,14 @@
+{
+  "name": "mermaid-web-project",
+  "version": "1.0.0",
+  "description": "A web project that renders a Mermaid chart in the browser.",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "live-server public"
+  },
+  "dependencies": {
+    "mermaid": "^10.0.0"
+  },
+  "author": "",
+  "license": "ISC"
+}

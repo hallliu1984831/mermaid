@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Heinrich's Pyramid Diagram</title>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+</head>
+<body>
+    <div class="mermaid">
+        flowchart BT
+            %% Use tri and trap-b shapes to simulate a pyramid
+            A@{ shape: tri, label: "严重事故<br>1起" }
+            B1@{ shape: trap-b, label: "轻微事故<br>29起" } --> A
+            C1@{ shape: trap-b, label: "未遂事件(危险行为)<br>300起" } --> B1
+            D1@{ shape: trap-b, label: "事故隐患(潜在的危险源)<br>1000起" }  --> C1
+            
+            classDef widest fill:#f9f,stroke:#333,stroke-width:2;
+            classDef medium fill:#bbf,stroke:#333,stroke-width:2;
+            classDef small fill:#bfb,stroke:#333,stroke-width:2;
+            classDef top fill:#fbb,stroke:#333,stroke-width:2;
+
+            %% 应用样式类
+            class D1 widest
+            class C1 medium
+            class B1 small
+            class A1 top
+    </div>
+</body>
+</html>

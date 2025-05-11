@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kubernetes Cluster Diagram</title>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+</head>
+<body>
+    <div class="mermaid">
+        graph LR
+            subgraph K8S集群
+                %% Define MasterNodes as a vertical subgraph
+                subgraph MasterNodes
+                    direction TB
+                    M1[主节点 1]
+                    M2[主节点 2]
+                    M3[主节点 3]
+                end
+
+                %% Define WorkerNodes as a horizontal subgraph
+                subgraph WorkerNodes
+                    direction TB
+                    W1[工作节点 1]
+                    W2[工作节点 2]
+                    W3[工作节点 3]
+                    W4[工作节点 4]
+                    W2 --> S1[数据收集应用POD1]
+                    W2 --> S2[数据收集应用POD2]
+                    W2 --> S3[数据收集应用POD3]
+                    W2 --> S4[数据收集应用POD4]
+                end
+                MasterNodes -- 为确保高可靠性和适当的负载分配，任意的master节点都可以单独控制所有的worker节点 --> WorkerNodes
+
+
+            end
+    </div>
+</body>
+</html>

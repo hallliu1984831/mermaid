@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mermaid Chart</title>
+    <script type="module" src="../src/index.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+</head>
+<body>
+    <div class="mermaid">
+        graph LR
+            A[Start] --> B{Is it working?}
+            B -->|Yes| C[Great!]
+            B -->|No| D[Fix it]
+            D --> B
+    </div>
+</body>
+</html>
