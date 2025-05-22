@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kubernetes</title>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+</head>
+<body>
+    <div class="mermaid">
+    mindmap
+        Root((Kubernetes 架构1))
+            集群管理
+                API Server
+                etcd
+                Controller Manager
+                Scheduler
+                Cloud Controller Manager
+            节点管理
+                kubelet
+                kube-proxy
+                Container Runtime
+            网络模块
+                CNI插件
+                kube-dns
+                service
+                Ingress Controller
+            存储管理
+                CSI插件
+                PV/PVC
+                StorageClass
+            工作负载管理
+                Pod
+                ReplicaSet
+                Deployment
+                StatefulSet
+                DaemonSet
+                Job/CronJob
+                ConfigMap
+    </div>
+    <div class="mermaid">
+    mindmap
+        Root((Kubernetes 架构2))
+            资源管理
+                Namespace
+                ResourceQuota
+                LimitRange
+                PriorityClass
+            监控与日志
+                Prometheus
+                Grafana
+                ELK Stack
+                Metrics Server
+            安全性
+                RBAC
+                Network Policy
+                Pod Security Policy
+                Secrets
+                Service Account
+            扩展性
+                Custom Resource Definitions (CRD)
+                Operator
+                Admission Controllers
+                Webhook
+                Helm
+            周边生态
+                CI/CD 工具
+                Service Mesh
+                API Gateway
+                负载均衡器
+    </div>
+</body>
+</html>

@@ -27,6 +27,7 @@ To set up and run the project, follow these steps:
 2. **Install dependencies**:
    ```
    npm install
+   npm install -g live-server
    ```
 
 3. **Run the application**:
