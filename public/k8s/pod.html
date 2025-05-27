@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kubernetes Cluster Diagram</title>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+</head>
+<body>
+            <div class="mermaid">
+                flowchart LR
+                    subgraph K8S-Cluster
+                        %% Define MasterNodes as a vertical subgraph
+                        subgraph Pod
+                            subgraph Container
+                            end
+                        end
+                    end
+                    A@{ shape: rounded, label: "镜像（image）" }
+                    K8S-Cluster --> A
+                    B@{ shape: cyl, label: "Docker 仓库" }
+                    A --> B
+                    C1@{ shape: cyl, label: "公有仓库docker hub" }
+                    C2@{ shape: cyl, label: "私有仓库docker registry" }
+                    B --> C1
+                    B --> C2
+            </div>  
+            <div class="mermaid">
+                flowchart LR
+                    A@{ shape: rounded, label: "Pod" }
+                    B@{ shape: comment, label: "一个 Pod 可以包含多个 Container" }
+                    A --> B
+                    C1@{ shape: comment, label: "Container 是 Pod 中的运行实例" }
+                    C2@{ shape: comment, label: "Containers 共享 Pod 的网络 (IP、Port)" }
+                    C3@{ shape: comment, label: "每个 Container 独立运行应用" }
+                    B --> C1
+                    B --> C2
+                    B --> C3
+            </div>   
+            <div class="mermaid">
+                flowchart LR
+                    A@{ shape: rounded, label: "Container" }
+                    B@{ shape: comment, label: "Container 是由 Image 创建的" }
+                    A --> B
+                    C1@{ shape: comment, label: "Image 是容器的模板" }
+                    C2@{ shape: comment, label: "Image 包含应用程序和其运行环境" }
+                    C3@{ shape: comment, label: "Image 包含文件系统层（操作系统、依赖、代码）" }
+                    C4@{ shape: comment, label: "Image 可以通过 Docker Hub 或私有镜像仓库获取" }
+                    B --> C1
+                    B --> C2
+                    B --> C3
+                    B --> C4
+            </div>    
+</body>
+</html>
