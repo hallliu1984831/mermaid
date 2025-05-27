@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kubernetes Cluster Diagram</title>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+</head>
+<body>
+    <div class="mermaid">
+        graph
+            subgraph K8S集群
+                direction LR
+                subgraph Secretss
+                    S1[base64加密过的密码]
+                end
+                subgraph Application
+                    direction TB
+                    P1[数据收集app:POD1]
+                    P2[数据收集app:POD2]
+                end
+                Application -- 通过key(如下图的username和password)读取secret中加密过的内容，通过k8s解密后在应用中使用 --> Secretss
+            end    
+    </div>
+    <div class="mermaid">
+        flowchart BT
+            A@{ img: "./secret.png", label: "K8S Secret例子", pos: "t", constraint: "off" }    
+            B@{ img: "./pod.png", label: "K8S Pod部署引用secret例子", pos: "t", w: 1000, h: 700, constraint: "off" } 
+            B --> A
+    </div>
+    <div class="mermaid">
+         graph
+            direction BT
+            subgraph K8S集群创建secret
+                subgraph 方式1
+                    s1[kubectl create secret generic db-credentials --from-file=username=username.txt --from-file=password=password.txt]
+                end
+                subgraph 方式2
+                    s2[kubectl create secret generic db-credentials --from-literal=username=root --from-literal=password=password]
+                end
+            end
+    </div>
+</body>
+</html>

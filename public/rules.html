@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Heinrich's Pyramid Diagram</title>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+</head>
+<body>
+    <div class="mermaid">
+        flowchart LR
+            id1([墨菲定律：凡是可能出错的事，终将出错。]) --> A
+            A@{ shape: comment, label: "强调了系统设计和运营中的脆弱性，提醒工程师在设计和运维过程中考虑最坏的情况，避免侥幸心理。" } 
+            id2([托德定律：如果一个问题多次重复发生，它就不是一个问题，而是一个系统特性。]) --> B
+            B@{ shape: comment, label: "不要将重复出现的问题简单视为孤立事件，而要从系统层面寻找根因。" }
+            id3([拉斯特法则：系统的复杂性与维护该系统的能力成反比。]) --> C
+            C@{ shape: comment, label: "系统越复杂，越难以维护和保障其可靠性。" }
+            id4([三不动/三不离法则])
+            D1@{ shape: brace-r, label: "业务高峰期不动" }
+            D2@{ shape: brace-r, label: "运行稳定时不动" }
+            D3@{ shape: brace-r, label: "无备份方案不动" }
+            D11@{ shape: lin-rect, label: "含义：在网络流量高峰期（例如白天的工作时段或用户活跃的晚间），不进行可能影响业务的操作，包括配置修改、设备升级或重启。\n原因：在高峰期操作网络设备，风险更高，一旦出现问题可能会对用户造成影响。\n实践：选择在业务低谷（如深夜或凌晨）进行维护。" }
+            D21@{ shape: lin-rect, label: "含义：对于运行状态良好的设备或配置，不轻易更改或升级。\n原因：任何更改都可能引入新的风险或问题，尤其是在稳定运行的情况下。\n实践：遵循“如果没有问题，就不要修复”的原则，确保系统保持稳定。" }
+            D31@{ shape: lin-rect, label: "含义：在没有制定完善的应急备份方案之前，不对核心设备或配置进行更改。\n原因：如果更改操作失败，备份方案是恢复服务的关键保障。\n实践：在每次更改前做好数据备份，并制定详细的回滚计划。" }
+            D1 --> id4
+            D11 --> D1
+            D2 --> id4 
+            D21 --> D2
+            D3 --> id4
+            D31 --> D3
+            D4@{ shape: comment, label: "变更后未经检查不离" }
+            D5@{ shape: comment, label: "发现告警不清理后不离" }
+            D6@{ shape: comment, label: "发现异常不查明不离" }
+            D41@{ shape: lin-rect, label: "含义：在对网络设备或配置进行更改后，必须进行全面的检查和验证。\n原因：变更可能会引入新的问题或影响现有功能，检查是确保系统正常运行的关键。\n实践：使用监控工具和日志分析，确保所有服务正常。" }
+            D51@{ shape: lin-rect, label: "含义：在网络设备或系统中发现告警后，必须及时进行处理和清理。\n原因：未处理的告警可能会导致系统性能下降或潜在故障。\n实践：建立告警处理流程，确保所有告警都能得到及时响应。" }
+            D61@{ shape: lin-rect, label: "含义：在发现系统异常后，必须进行深入调查和分析。\n原因：未查明的异常可能会导致系统不稳定或潜在的安全风险。\n实践：使用日志分析和故障排除工具，确保所有异常都能得到处理。" }
+            id4 --> D4
+            id4 --> D5
+            id4 --> D6
+            D4 --> D41
+            D5 --> D51  
+            D6 --> D61
+    </div>
+</body>
+</html>

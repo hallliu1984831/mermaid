@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kubernetes</title>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+</head>
+<body>
+    <div class="mermaid">
+    mindmap
+        Root((Kubernetes 已学习内容))
+            应用配置管理
+                ConfigMap:今日话题
+            工作负载管理
+                Pod:已分享生产案例，需进一步学习
+            安全性
+                Secret:已学习内容
+    </div>
+    <div class="mermaid">
+    flowchart LR
+            id1([ConfigMap])
+            A@{ shape: comment, label: "K8S中用于存储非机密的\n配置信息的API对象。" }
+            B@{ shape: comment, label: "以键值对的形式存储。" }
+            C@{ shape: comment, label: "将配置信息与应用程序解耦。" }
+            D@{ shape: comment, label: "支持多种数据来源并引用。" }
+
+            id1 --> A
+            id1 --> B
+            id1 --> C
+            id1 --> D
+            A11@{ shape: lin-rect, label: "存储环境变量\n配置文件内容\n命令行参数" }
+            A --> A11
+            B11@{ img: "./configmap.png", pos: "t", constraint: "off" }
+            B --> B11
+            D10@{ shape: lin-rect, label: "直接在YAML文件中定义键值\n对注入到容器的环境变量中" }
+            D11@{ shape: lin-rect, label: "从文件内容或目录生成文件 \n 挂载到容器中" }
+            D12@{ shape: lin-rect, label: "通过命令行参数动态生成 \n 作为启动参数传递给应用" }
+            D --> D10
+            D --> D11
+            D --> D12
+    </div>
+</body>
+</html>

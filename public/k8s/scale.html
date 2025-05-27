@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kubernetes</title>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+</head>
+<body>
+    <div class="mermaid">
+    mindmap
+        Root((Kubernetes 学习进度))
+            应用配置管理
+                ConfigMap:已学习内容
+            工作负载管理
+                Pod:已分享生产案例，需进一步学习
+                   服务扩展:已学习内容
+            自动化:
+                水平 Pod 自动伸缩: 今日话题
+                垂直 Pod 自动伸缩
+                集群自动伸缩
+            安全性
+                Secret:已学习内容
+    </div>
+    <div class="mermaid">
+    flowchart LR
+            id1([服务扩展])
+            A@{ shape: comment, label: "横向扩展(Scale Out)\n水平扩展" }
+            B@{ shape: comment, label: "纵向扩展(Scale Up)\n垂直扩展" }
+
+            id1 --> A
+            id1 --> B
+            A10@{ shape: lin-rect, label: "通过增加更多服务单元来应对需求" }
+            A --> A10
+            A11@{ shape: docs, label: "多个并行服务单元" }
+            A10 --> A11
+            B10@{ shape: lin-rect, label: "通过增加单个服务单元的资源来应对需求" }
+            B --> B10
+            B11@{ shape: doc, label: "&nbsp;&nbsp;&nbsp;资源更强劲的服务单元&nbsp;&nbsp;&nbsp;\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" }
+            B10 --> B11
+    </div>
+</body>
+</html>
