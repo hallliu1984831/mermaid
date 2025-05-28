@@ -8,7 +8,8 @@ metadata:                          # Pod 的元数据
   labels:                          # 给 Pod 添加标签
     app: nginx
 spec:
-  containers:
+  restartPolicy: Always            # 重启策略
+  containers:                      # Pod 中的容器列表和配置
     - name: nginx-container        # 容器名称
       image: nginx:1.21            # 容器使用的镜像
       ports:
