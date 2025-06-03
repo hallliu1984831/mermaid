@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kubernetes</title>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+</head>
+<body>
+    <div class="mermaid">
+    mindmap
+        Root((Kubernetes 学习进度))
+            应用配置管理
+                ConfigMap:已学习内容
+            工作负载管理
+                Pod:学习中
+                   服务扩展/简介/生命周期:已学习内容
+                   错误状态一描述：已学习内容
+                   错误状态一修复: 今日话题
+            自动化:
+                水平 Pod 自动伸缩: 已学习内容
+            安全性
+                Secret:已学习内容
+    </div>
+    <div class="mermaid">
+    flowchart LR
+            id1([POD（共享宿舍）错误状态])
+            A@{ shape: comment, label: "CrashLoopBackOff" }
+            B@{ shape: comment, label: "ImagePullBackOff" }
+            C@{ shape: comment, label: "ErrImagePull" }
+            D@{ shape: comment, label: "ContainerCreating" }
+            E@{ shape: comment, label: "OOMKilled" }
+            F@{ shape: comment, label: "Evicted" }
+
+            id1 --> A
+            id1 --> B
+            id1 --> C
+            id1 --> D
+            id1 --> E
+            id1 --> F
+            A10@{ shape: lin-rect, label: "房东天天把你赶出去修房子。" }
+            A --> A10
+            B10@{ shape: lin-rect, label: "房东找不到钥匙，你只能干等着。" }
+            B --> B10
+            C10@{ shape: lin-rect, label: "房东告诉你，这房子根本不存在。" }
+            C --> C10
+            D10@{ shape: lin-rect, label: "房东正在忙着装修，暂时住不进去。" }
+            D --> D10
+            E10@{ shape: lin-rect, label: "房子太小，家具塞不下，你被赶出去了。" }
+            E --> E10
+            F10@{ shape: lin-rect, label: "房东想加房租可你不答应，把你赶走了。" }
+            F --> F10
+    </div>
+</body>
+</html>
