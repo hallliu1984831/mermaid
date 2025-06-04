@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kubernetes</title>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+</head>
+<body>
+    <div class="mermaid">
+    mindmap
+        Root((Kubernetes 学习进度))
+            应用配置管理
+                ConfigMap:已学习内容
+            工作负载管理
+                Pod:学习中
+                   服务扩展/简介/生命周期:已学习内容
+                   错误状态一描述/修复：已学习内容
+                   错误状态二描述/修复: 今日话题
+            自动化:
+                水平 Pod 自动伸缩: 已学习内容
+            安全性
+                Secret:已学习内容
+    </div>
+    <div class="mermaid">
+    flowchart LR
+            id1([POD（共享宿舍）错误状态列表2])
+            A@{ shape: comment, label: "PodInitializing" }
+            B@{ shape: comment, label: "Unschedulable" }
+            C@{ shape: comment, label: "Error" }
+
+            id1 --> A
+            id1 --> B
+            id1 --> C
+            A10@{ shape: lin-rect, label: "搬家路上堵车，家具还没到" }
+            A --> A10
+            A11@{ shape: lin-rect, label: "Pod 正在初始化中（initContainer 尚未完成），还没准备好运行。" }
+            A10 --> A11
+            B10@{ shape: lin-rect, label: "找不到合适的房子" }
+            B --> B10
+            B11@{ shape: lin-rect, label: "Pod 无法被调度到任何节点上，因为没有满足条件的节点。" }
+            B10 --> B11
+            C10@{ shape: lin-rect, label: "租房过程中出了大问题" }
+            C --> C10
+            C11@{ shape: lin-rect, label: "Pod 的容器启动失败，返回非零退出码。" }
+            C10 --> C11
+    </div>
+</body>
+</html>
