@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kubernetes</title>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+</head>
+<body>
+    <div class="mermaid">
+    mindmap
+        Root((Kubernetes 学习进度))
+            应用配置管理
+                ConfigMap:已学习内容
+            工作负载管理
+                Pod:学习中
+                   服务扩展/简介/生命周期:已学习内容
+                   错误状态一、二描述/修复：已学习内容
+                   错误状态三描述/修复: 今日话题
+            自动化:
+                水平 Pod 自动伸缩: 已学习内容
+            安全性
+                Secret:已学习内容
+    </div>
+    <div class="mermaid">
+    flowchart LR
+            id1([POD（共享宿舍）错误状态列表3])
+            A@{ shape: comment, label: "NodeLost" }
+            B@{ shape: comment, label: "Completed" }
+
+            id1 --> A
+            id1 --> B
+            A10@{ shape: lin-rect, label: "房东跑路，小区物业联系不上" }
+            A --> A10
+            A11@{ shape: lin-rect, label: "Pod 所在节点与集群断开连接，Kubernetes 无法访问该节点。" }
+            A10 --> A11
+            B10@{ shape: lin-rect, label: "租期到期，搬走了但房子还在" }
+            B --> B10
+            B11@{ shape: lin-rect, label: "Pod 中的任务已经完成，所有容器正常退出，但 Pod 本身还未被清理。" }
+            B10 --> B11
+    </div>
+</body>
+</html>
