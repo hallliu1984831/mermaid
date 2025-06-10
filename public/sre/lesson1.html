@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kubernetes</title>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+</head>
+<body>
+    <div class="mermaid">
+        flowchart LR
+            id4([日志级别设置为 DEBUG/TRACE])
+            D1@{ shape: brace-r, label: "详细的问题排查" }
+            D2@{ shape: brace-r, label: "深入理解应用行为" }
+            D3@{ shape: brace-r, label: "辅助开发和测试" }
+            D4@{ shape: comment, label: "快速定位错误源" }
+            D11@{ shape: lin-rect, label: "提供程序执行的细粒度信息，包括变量值、代码路径等。" }
+            D21@{ shape: lin-rect, label: "能够追踪应用的内部状态和流程，有助于开发者理解代码的实际运行情况。" }
+            D31@{ shape: lin-rect, label: "系在开发和测试阶段，DEBUG 日志是调试代码、验证逻辑的强大工具。" }
+            D41@{ shape: lin-rect, label: "通过详细的日志信息，可以更快地找到错误发生的具体位置和原因。" }
+            D1 -- 好处 --> id4
+            D11 --> D1
+            D2 -- 好处 --> id4 
+            D21 --> D2
+            D3 -- 好处 --> id4
+            D31 --> D3
+            D4@{ shape: comment, label: "日志量巨大" }
+            D5@{ shape: comment, label: "性能开销高" }
+            D6@{ shape: comment, label: "占用网络带宽" }
+            D7@{ shape: comment, label: "难以分析和阅读" }
+            D8@{ shape: comment, label: "潜在的安全和隐私风险" }
+            D9@{ shape: comment, label: "增加存储和传输成本" }
+            D10@{ shape: comment, label: "影响应用稳定性" }
+            D41@{ shape: lin-rect, label: "产生海量的日志数据，远超其他级别，可能迅速填满存储空间。" }
+            D51@{ shape: lin-rect, label: "日志生成、格式化、写入等操作会消耗大量 CPU 和内存资源。" }
+            D61@{ shape: lin-rect, label: "如果日志被发送到远程日志收集系统，巨大的日志量会消耗大量网络带宽，可能导致网络拥塞。" }
+            D71@{ shape: lin-rect, label: "海量日志中充斥着大量细节，使得人工或自动化分析变得困难，关键信息容易被淹没。" }
+            D81@{ shape: lin-rect, label: "DEBUG 日志可能无意中记录敏感信息（如用户数据、配置详情等），增加数据泄露的风险。" }
+            D91@{ shape: lin-rect, label: "存储和传输大量日志数据需要更多的存储空间和更高的网络费用。" }
+            D101@{ shape: lin-rect, label: "在资源受限或高并发环境下，过度的日志输出可能导致应用性能下降甚至崩溃。" }
+            id4 -- 坏处 --> D4
+            id4 -- 坏处 --> D5
+            id4 -- 坏处 --> D6
+            id4 -- 坏处 --> D7
+            id4 -- 坏处 --> D8
+            id4 -- 坏处 --> D9
+            id4 -- 坏处 --> D10
+            D4 --> D41
+            D5 --> D51  
+            D6 --> D61
+            D7 --> D71
+            D8 --> D81
+            D9 --> D91
+            D10 --> D101
+    </div>
+    <div class="mermaid">
+        flowchart LR
+            id1([日志级别分类])
+            D1@{ shape: comment, label: "FATAL" }
+            D11@{ shape: lin-rect, label: "应用无法继续运行，必须立即停止。" }
+            D2@{ shape: comment, label: "ERROR" }
+            D21@{ shape: lin-rect, label: "应用发生严重错误，影响主要功能，但仍可继续运行。" }
+            D3@{ shape: comment, label: "WARN" }
+            D31@{ shape: lin-rect, label: "应用运行中出现异常情况，但不影响主要功能。" }
+            D4@{ shape: comment, label: "INFO" }
+            D41@{ shape: lin-rect, label: "应用正常运行的关键信息，通常用于记录重要事件。" }
+            D5@{ shape: comment, label: "DEBUG" }
+            D51@{ shape: lin-rect, label: "应用运行的详细信息，通常用于调试和开发阶段。" }
+            D6@{ shape: comment, label: "TRACE" }
+            D61@{ shape: lin-rect, label: "应用运行的极其详细信息，通常用于深入调试。" }
+            id1 --> D1
+            id1 --> D2
+            id1 --> D3
+            id1 --> D4
+            id1 --> D5
+            id1 --> D6
+            D1 --> D11
+            D2 --> D21
+            D3 --> D31
+            D4 --> D41
+            D5 --> D51
+            D6 --> D61
+
+
+    </div>
+    
+</body>
+</html>
