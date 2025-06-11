@@ -21,3 +21,29 @@ spec:
         requests:
           memory: "64Mi"           # 最小内存请求
           cpu: "250m"              # 最小 CPU 请求
+
+apiVersion: v1               # API 版本
+kind: Pod                    # 资源类型
+metadata:                    # POD 元数据
+  name: busybox-time-pod     # POD 名称
+  namespace: default         # POD 所在的命名空间
+  labels:                    # 标签
+    app: busybox-time        # 应用标签
+spec:
+  containers:
+    - name: busybox-container # 容器名称
+      image: busybox          # 容器镜像，来源于 Docker Hub
+      imagePullPolicy: IfNotPresent # 镜像拉取策略
+      command: ["sh", "-c", "while true; do echo $(date); sleep 5; done"] # 容器命令，持续输出当前时间
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: busybox-time-pod
+  labels:
+    app: busybox-time
+spec:
+  containers:
+    - name: busybox-container
+      image: busybox
+      command: ["sh", "-c", "while true; do echo $(date); sleep 5; done"]

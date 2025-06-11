@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kubernetes</title>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+</head>
+<body>
+    <div class="mermaid">
+    flowchart LR
+            id1([POD正常状态变动])
+            A@{ shape: comment, label: "Pending" }
+            B@{ shape: comment, label: "ContainerCreating" }
+            C@{ shape: comment, label: "Running" }
+            G@{ shape: comment, label: "Terminating" }
+            H@{ shape: comment, label: "Error" }
+            
+
+            id1 --> A
+            id1 --> B
+            id1 --> C
+            id1 --> G
+            id1 --> H
+            A10@{ shape: lin-rect, label: "K8S Pod正在等待初始化" }
+            A --> A10
+            B10@{ shape: lin-rect, label: "Pod正在创建中，容器还没准备好运行。" }
+            B --> B10
+            C10@{ shape: lin-rect, label: "Pod正在运行中" }
+            C --> C10
+            G10@{ shape: lin-rect, label: "Pod正在终止中，等待清理资源。" }
+            G -- 删除pod --> G10
+            H10@{ shape: lin-rect, label: "Pod被删除" }
+            H --> H10
+    </div>
+    <div class="mermaid">
+    flowchart LR
+            id1([POD异常状态变动一])
+            A@{ shape: comment, label: "Pending" }
+            B@{ shape: comment, label: "ContainerCreating" }
+            E@{ shape: comment, label: "ErrImagePull" }
+            F@{ shape: comment, label: "ImagePullBackOff" }
+            G@{ shape: comment, label: "Terminating" }
+            H@{ shape: comment, label: "Error" }
+            
+
+            id1 --> A
+            id1 --> B
+            id1 --> E
+            id1 --> F
+            id1 --> G
+            id1 --> H
+            A10@{ shape: lin-rect, label: "K8S Pod正在等待初始化" }
+            A --> A10
+            B10@{ shape: lin-rect, label: "Pod正在创建中，容器还没准备好运行。" }
+            B --> B10
+            E10@{ shape: lin-rect, label: "Pod启动失败，无法从镜像仓库中拉去镜像文件" }
+            E --> E10
+            F10@{ shape: lin-rect, label: "Pod启动失败，持续获取镜像失败中，继续尝试" }
+            F --> F10
+            G10@{ shape: lin-rect, label: "Pod正在终止中，等待清理资源。" }
+            G -- 删除pod --> G10
+            H10@{ shape: lin-rect, label: "Pod被删除" }
+            H --> H10
+    </div>
+    <div class="mermaid">
+    flowchart LR
+            id1([POD异常状态变动二])
+            A@{ shape: comment, label: "Pending" }
+            B@{ shape: comment, label: "Error" }
+            D@{ shape: comment, label: "CrashLoopBackOff" }
+            G@{ shape: comment, label: "Terminating" }
+            H@{ shape: comment, label: "Error" }
+            
+
+            id1 --> A
+            id1 --> B
+            id1 --> D
+            id1 --> G
+            id1 --> H
+            A10@{ shape: lin-rect, label: "K8S Pod正在等待初始化" }
+            A --> A10
+            B10@{ shape: lin-rect, label: "Pod发生错误，无法启动。" }
+            B --> B10
+            D10@{ shape: lin-rect, label: "Pod持续发生错误，重试启动。" }
+            D --> D10
+            G10@{ shape: lin-rect, label: "Pod正在终止中，等待清理资源。" }
+            G -- 删除pod --> G10
+            H10@{ shape: lin-rect, label: "Pod被删除" }
+            H --> H10
+            
+    </div>
+</body>
+</html>
