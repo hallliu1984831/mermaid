@@ -30,14 +30,12 @@
                     subgraph ReplicaSet
                         direction TB
                         RS1[ReplicaSet 1]
-                        RS2[ReplicaSet 2]
-                        RS3[ReplicaSet 3]
+                        RS2[ReplicaSet 2 ...]
                     end
                     subgraph Pod
                         direction TB
                         P1[Pod 1]
-                        P2[Pod 2]
-                        P3[Pod 3]
+                        P2[Pod 2 ...]
                     end
                     ReplicaSet -- 控制 --> Pod
                 end

@@ -1,3 +1,24 @@
+apiVersion: apps/v1               # API版本
+kind: Deployment                  # 资源类型
+metadata:                         # Deployment 元数据
+  name: busybox-time-deployment   # 部署名称
+  labels:                         # 标签
+    app: busybox-time             # 应用标签
+spec:
+  replicas: 1                     # 副本数
+  selector:                       # 选择器，用于匹配Pod
+    matchLabels:                  # 标签选择器 
+      app: busybox-time           # 应用标签
+  template:                       # POD 模板
+    metadata:                     # POD 元数据 
+      labels:                     # POD 标签
+        app: busybox-time         # 应用标签
+    spec:                         # POD 规范
+      containers:                 # 容器列表
+        - name: busybox-container # 容器名称
+          image: busybox          # 容器镜像，来源于 Docker Hub
+          command: ["sh", "-c", "while true; do echo $(date); sleep 5; done"] # 容器命令，持续输出当前时间
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -14,7 +35,7 @@ spec:
       labels:
         app: busybox-time
     spec:
-      containers:
+      containers: 
         - name: busybox-container
           image: busybox
           command: ["sh", "-c", "while true; do echo $(date); sleep 5; done"]
