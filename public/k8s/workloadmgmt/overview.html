@@ -11,14 +11,15 @@
     mindmap
         Root((Kubernetes 学习进度))
             应用配置管理
-                ConfigMap:已学习内容
+                ConfigMap: 已学习内容
             自动化:
                 水平 Pod 自动伸缩: 已学习内容
             安全性
-                Secret:已学习内容
+                Secret: 已学习内容
             工作负载管理
-                Pod:已学习内容
-                Deployment -- ReplicaSet: 今日话题
+                Pod: 已学习内容
+                Deployment -- ReplicaSet: 已学习内容
+                Service -- Endpoint: 今日话题
     </div>
     
 
@@ -32,14 +33,26 @@
                         RS1[ReplicaSet 1]
                         RS2[ReplicaSet 2 ...]
                     end
-                    subgraph Pod
-                        direction TB
-                        P1[Pod 1]
-                        P2[Pod 2 ...]
-                    end
-                    ReplicaSet -- 控制 --> Pod
-                end
 
+                end
+                subgraph Pod
+                    direction TB
+                    P1[Pod 1]
+                    P2[Pod 2 ...]
+                end
+                ReplicaSet -- 控制 --> Pod
+                subgraph Service
+                    direction TB
+                    S1[Service 1]
+                    S2[Service 2 ...]
+                end
+                subgraph Endpoint
+                    direction TB
+                    E1[Endpoint 1]
+                    E2[Endpoint 2 ...]
+                end
+                Service -- 访问 --> Endpoint
+                Endpoint -- 访问 --> Pod
             end
     </div>
 </body>

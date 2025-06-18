@@ -39,3 +39,35 @@ spec:
         - name: busybox-container
           image: busybox
           command: ["sh", "-c", "while true; do echo $(date); sleep 5; done"]
+
+
+apiVersion: v1                 # API版本
+kind: Service                  # 资源类型
+metadata:                      # Service 元数据
+  name: busybox-time-service   # 服务名称
+  labels:                      # 标签
+    app: busybox-time          # 应用标签，用于选择器匹配对应的 Deployment
+spec:                          # Service 规范
+  selector:                    # 选择器，用于匹配 Pod
+    app: busybox-time          # 应用标签
+  ports:                       # 服务端口列表
+    - protocol: TCP            # 协议类型
+      port: 80                 # 服务端口
+      targetPort: 80           # 目标端口，指向 Pod 中的容器端口
+  type: ClusterIP              # 服务类型，ClusterIP 表示集群内部访问，外部不可访问
+
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: busybox-time-service
+  labels:
+    app: busybox-time
+spec:
+  selector:
+    app: busybox-time
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+  type: ClusterIP
