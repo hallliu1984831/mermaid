@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kubernetes Cluster Diagram</title>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+</head>
+<body>
+    <div class="mermaid">
+        graph LR
+            direction TB
+            subgraph 服务调用流程
+                %% Define MasterNodes as a vertical subgraph
+                subgraph 客户端
+                    direction BT
+                    web浏览器
+                    移动App
+                    调用其他微服务的服务
+                end
+
+                %% Define WorkerNodes as a horizontal subgraph
+                subgraph 服务器端
+                    direction BT
+                    Web服务器
+                    API网关
+                    数据库服务器
+                end
+                客户端 -- 发起请求 --> 服务器端
+                服务器端 -- 处理请求并返回结果 --> 客户端
+
+            end
+    </div>
+</body>
+</html>
