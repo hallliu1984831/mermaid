@@ -1,0 +1,89 @@
+# daemonset.yaml
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: nginx-daemonset
+  labels:
+    app: nginx-ds
+spec:
+  selector:
+    matchLabels:
+      app: nginx-ds
+  template:
+    metadata:
+      labels:
+        app: nginx-ds
+    spec:
+      containers:
+        - name: nginx
+          image: nginx:latest
+          ports:
+            - containerPort: 80
+
+kubectl apply -f daemonset.yaml:
+   nginx-daemonset-2x9kq
+
+# statefulset.yaml
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: nginx-statefulset
+  labels:
+    app: nginx-ss
+spec:
+  serviceName: "nginx-ss-headless"
+  replicas: 3
+  selector:
+    matchLabels:
+      app: nginx-ss
+  template:
+    metadata:
+      labels:
+        app: nginx-ss
+    spec:
+      containers:
+        - name: nginx
+          image: nginx:latest
+          ports:
+            - containerPort: 80
+  volumeClaimTemplates:
+    - metadata:
+        name: nginx-data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 1Gi
+
+kubectl apply -f statefulset.yaml:
+   nginx-statefulset-0
+   nginx-statefulset-1
+   nginx-statefulset-2
+
+# deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deployment
+  labels:
+    app: nginx-demo
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: nginx-demo
+  template:
+    metadata:
+      labels:
+        app: nginx-demo
+    spec:
+      containers:
+        - name: nginx
+          image: nginx:latest
+          ports:
+            - containerPort: 80
+
+kubectl apply -f deployment.yaml:
+   nginx-deployment-7c8d6f7b5c-abcde
+   nginx-deployment-7c8d6f7b5c-fghij
+   nginx-deployment-7c8d6f7b5c-klmno
