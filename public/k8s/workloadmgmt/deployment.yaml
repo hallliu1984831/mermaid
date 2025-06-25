@@ -56,7 +56,6 @@ spec:                          # Service 规范
       targetPort: 80           # 目标端口，指向 Pod 中的容器端口
   type: ClusterIP              # 服务类型，ClusterIP 表示集群内部访问，外部不可访问
 
-
 apiVersion: v1
 kind: Service
 metadata:
@@ -70,4 +69,27 @@ spec:
     - protocol: TCP
       port: 80
       targetPort: 80
-  type: ClusterIP
+  type: ClusterIP           
+
+headless-service.yaml:
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: busybox-time-service
+  labels:
+    app: busybox-time
+spec:
+  clusterIP: None             # 标识当前 service 是 headless service
+  selector:
+    app: busybox-time
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+#  type: ClusterIP            # 对于 headless service，不需要指定 type，注释行留着对比用
+
+kubectl apply -f headless-service.yaml:
+
+NAME                   TYPE        CLUSTER-IP   EXTERNAL-IP   PORT(S)   AGE
+busybox-time-service   ClusterIP   None         <none>        80/TCP    10s
