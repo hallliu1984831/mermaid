@@ -1,3 +1,4 @@
+章节1:
 大家好，欢迎来到SRE大厅一起学习英语。在英语世界里，有一种同时包含正反两种矛盾情感或意义的单词非常有趣，它们能够传达复杂而微妙的情感或状态。我们来一起看看吧
 Bittersweet（苦乐参半）
 一种既甜美又苦涩的感觉，比如告别、怀旧，或某些不完美却美好的时刻。
@@ -26,7 +27,7 @@ tragic和comic的组合
 还有那个让人 love-hate的闹钟，每天早上准时把你从温暖的被窝里拉出来。起床后，你一边骂它“世界上最讨厌的发明”，一边又不得不感激它，不然你就要迟到了。真是 tragicomic 的一幕！
 说到周末的深夜，你有没有经历过那种 guilty pleasure？比如一边嚷嚷着要减肥，一边打开外卖软件点了炸鸡和奶茶。吃的时候无比幸福，吃完后又开始质问自己：“我为什么要这样？”这种感觉，和看一部 awfully good 的狗血剧一样，明知道它“很离谱”，却根本停不下来！
 
-
+章节2:
 大家好，欢迎来到SRE大厅一起学习趣味英语。英语中的“off”是一个非常常见且灵活的小词，可以和许多其他单词组合形成短语动词或表达，传达不同的意思。
 常见的例如：Take off：脱下、起飞；Turn off：关闭；Call off：取消，Pay off：还清（债务）/得到回报等，Cut off：切断。下面我们来聊几个有趣的off组合。
 
@@ -38,4 +39,64 @@ Laugh it off：一笑而过。When he slipped on the ice, he just laughed it off
 Slack off：偷懒，懒散。He’s been slacking off at work lately.
 Kick off：开始，启动。The party kicked off at midnight.
 你还知道有哪些有意思的off组合呢？在评论区来说一说吧
+
+
+章节3:
+英语否定词的花式玩法：可不是No这么简单
+
+大家好！今天我们来聊聊英语中那些"说不"的艺术。在英语的世界里，表达否定可不只是简单粗暴地说个"No"，而是有着各种花里胡哨的玩法，简直比变魔术还精彩！
+
+前缀否定军团：给单词戴"帽子" 
+Un家族（最勤劳的否定工人）
+Unnecessary（不必要的）- 就像你妈让你穿秋裤时的那种感觉
+Unforgettable（难忘的）- 等等，这不是否定啊！
+Unbelievable（难以置信的）- 当你发现苏超球票一票难求的时候
+
+In-/Im-家族（高冷贵族派）
+Impossible（不可能的）- 比如让程序员承认自己的代码有bug
+Incredible（不可思议的）- 又一个假否定，实际是夸人的
+Invisible（看不见的）- 就像你的存款余额，用8位密码保护5位数的存款
+
+Dis-家族（专业拆台户）
+Disappear（消失）- 发工资前一天你银行卡里的钱
+Disconnect（断开连接）- WiFi在你最需要它的时候
+Dislike（不喜欢）- 比hate温柔一点的嫌弃
+
+后缀否定帮：给单词穿"鞋子" 
+less家族（极简主义者）
+Hopeless（没希望的）- 周一早上的你
+Homeless（无家可归的）- 房价面前的年轻人
+Wireless（无线的）- 现代人的生命线
+free家族（自由斗士）
+Sugar-free（无糖的）- 减肥人士的自我安慰
+Stress-free（无压力的）- 一起躺平啊
+Gluten-free（无麸质的）- 网红餐厅的必备标签
+
+复合否定词：创意无限大
+
+Anti-家族（专业对着干）
+Anti-social（反社交的）- 宅男宅女的代名词
+Anti-terriorism elite - 游戏《反恐精英》，又称半条命，80后的记忆
+
+Non-家族（佛系否定派）
+Non-stop（不停的）- 妈妈的唠叨
+Non-sense（胡说八道）- 老板开会时说的话
+
+你还知道什么否定的表达么？来一起分享下
+
+章节3: 比赛第一，友谊第14
+直译版本：Competition first, friendship fourteenth.
+地道表达：Winning comes first, friendship comes... way down the list.
+幽默版本：Victory first, friendship somewhere around 14th place.
+网络梗版本：Competition > Friendship (by a lot)
+解释：Competition first, friendship 14th - A humorous way to say winning is way more important than friendship
+
+在英语语境中，类似的表达还有：
+"Winning isn't everything, it's the only thing"
+"Second place is first loser"
+"Nice guys finish last"
+
+13太保：Jiangsu's 13 prefecture-level cities, known as "The 13 Guardians"
+江苏13太保足球锦标赛：Jiangsu 13 Guardians Football Championship
+
 
