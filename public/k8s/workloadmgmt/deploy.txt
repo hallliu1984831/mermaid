@@ -193,3 +193,119 @@ LoadBalancer = 请门卫 - 专业且让人放心，但要花钱
 Service外部访问就两招：NodePort自己开门，LoadBalancer请门卫，选哪个看钱包！
 
 到此篇为止，我已经完整介绍了 POD 相关的创建，控制器，访问，对外暴露等。有了这些基本知识，服务基本可以上线了 👍
+
+章节7:
+Pod装修指南：给共享宿舍来个精装修 🏠
+
+大家好！前面我们聊了Pod这个"共享宿舍"和它的管理员们，也知道了怎么开门迎客。今天该给这个宿舍好好装修一下了！毕竟，光有房子不行，还得有密码锁、限电器这些基础设施，不然舍友们住得不安全也不舒服。
+
+核心问题：宿舍需要哪些装修？
+
+基础装修清单
+Secret（保险箱）：存放重要的密码和证件
+Resource Limits（限电器）：防止某个舍友用电过度
+ConfigMap（公告板）：贴一些公共配置信息
+Volume（储物柜）：数据持久化存储
+
+今天重点聊前两个：保险箱和限电器！
+
+Secret：宿舍里的小保险箱 🔐
+就像宿舍里放个小保险箱，专门存放重要的密码、证件、私房钱
+
+必要性：
+数据库密码不能明文写在代码里（就像不能把银行卡密码贴在卡上）
+API密钥需要安全存储（泄露了就完蛋）
+证书文件要保密（HTTPS证书很重要）
+请参考前篇文章 “Kubernetes Secret 踩坑案例”，具体了解 secret 的配置
+
+举个栗子：
+Secret就像宿舍的小保险箱，只有知道密码的舍友才能打开
+环境变量就像把保险箱里的东西悄悄递给需要的人
+base64编码就像给密码穿了件"隐身衣"，不是真正的加密但至少不会一眼看穿
+
+Resource Limits：宿舍限电器
+就像宿舍装个智能限电器，防止某个舍友开太多电器把整个宿舍电闸跳了
+
+必要性：
+防止"电老虎"舍友：某个容器占用过多CPU/内存
+保证公平使用：每个容器都有自己的资源配额
+避免宿舍"停电"：防止整个节点资源耗尽
+
+举个栗子：
+requests：就像宿舍保证每个人至少有1000W的用电额度
+limits：就像限电器设置最高不能超过3000W，超了就跳闸
+没有limits：就像某个舍友开了10个暖风机，把整栋楼都搞停电了
+
+来一个给nginx宿舍装修的案例：
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-luxury-edition
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: nginx-luxury
+  template:
+    metadata:
+      labels:
+        app: nginx-luxury
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:latest
+        # 🔐 从保险箱里拿密码
+        env:
+        - name: ADMIN_USER
+          valueFrom:
+            secretKeyRef:
+              name: nginx-secrets
+              key: admin-user
+        - name: ADMIN_PASS
+          valueFrom:
+            secretKeyRef:
+              name: nginx-secrets
+              key: admin-pass
+        # ⚡ 安装限电器
+        resources:
+          requests:
+            memory: "64Mi"    # 基础内存：64MB
+            cpu: "50m"        # 基础CPU：0.05核心
+          limits:
+            memory: "128Mi"   # 最大内存：128MB
+            cpu: "100m"       # 最大CPU：0.1核心
+        ports:
+        - containerPort: 80
+```
+
+装修前（毛坯）：
+❌ 密码明文写在配置里，一眼就被看穿
+❌ 没有资源限制，某个容器可能把节点搞崩
+❌ 就像住在毛坯房里，啥都没有
+
+装修后（像模像样了）：
+✅ 密码安全存储在Secret里，需要授权才能访问
+✅ 资源使用有序，每个容器都有自己的"用电额度"
+✅ 就像住进了精装修公寓，安全又舒适
+
+Pod装修就像宿舍装修：Secret是保险箱保护隐私，Resource Limits是限电器保证公平，装修到位了大家住得才安心！
+
+
+
+章节8:
+ConfigMap（公告板）：贴一些公共配置信息
+Volume（移动储物柜）：数据持久化存储
+**Secret使用建议：**
+不要把Secret当成ConfigMap用（保险箱不是公告板）
+定期更换密码（就像定期换锁）
+权限控制要严格（不是谁都能开保险箱）
+**Resource设置建议：**
+requests设置要合理：太低影响性能，太高浪费资源
+limits要有上限：防止"电老虎"把邻居也搞停电
+监控资源使用：定期检查是否需要"扩容电路"
+
+## 一句话总结 🎯
+
+*记住：好的Pod配置就像好的室友，既保护自己的隐私，又不影响别人的正常生活！* 😊
