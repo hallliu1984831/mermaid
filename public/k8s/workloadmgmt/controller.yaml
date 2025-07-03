@@ -141,3 +141,109 @@ kubectl apply -f deployment.yaml:
    nginx-deployment-7c8d6f7b5c-abcde
    nginx-deployment-7c8d6f7b5c-fghij
    nginx-deployment-7c8d6f7b5c-klmno
+
+nslookup nginx-service
+wget -qO- nginx-service:80
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-affinity-demo
+  labels:
+    app: nginx-affinity
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: nginx-affinity
+  template:
+    metadata:
+      labels:
+        app: nginx-affinity
+        tier: frontend
+    spec:
+      # Node Affinity: 选择特定类型的节点
+      affinity:
+        nodeAffinity:
+          # 硬性要求：必须是Linux节点
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: kubernetes.io/os
+                operator: In
+                values: ["linux"]
+          # 软性偏好：最好是高内存节点
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            preference:
+              matchExpressions:
+              - key: node-type
+                operator: In
+                values: ["high-memory"]
+
+        # Pod Affinity: 希望和Redis缓存住一起
+        podAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values: ["redis"]
+              topologyKey: kubernetes.io/hostname
+
+        # Pod Anti-Affinity: 不和其他nginx实例住同一个节点
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values: ["nginx-affinity"]
+            topologyKey: kubernetes.io/hostname
+
+      # Tolerations: 可以住在有特殊标签的节点上
+      tolerations:
+      - key: "environment"
+        operator: "Equal"
+        value: "production"
+        effect: "NoSchedule"
+      - key: "dedicated"
+        operator: "Equal"
+        value: "frontend"
+        effect: "NoExecute"
+      - key: "gpu"
+        operator: "Exists"
+        effect: "NoSchedule"
+
+      containers:
+      - name: nginx
+        image: nginx:latest
+        ports:
+        - containerPort: 80
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "50m"
+          limits:
+            memory: "128Mi"
+            cpu: "100m"
+
+---
+# Service for the affinity demo
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-affinity-service
+  labels:
+    app: nginx-affinity
+spec:
+  selector:
+    app: nginx-affinity
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+  type: ClusterIP

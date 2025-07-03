@@ -295,17 +295,217 @@ Pod装修就像宿舍装修：Secret是保险箱保护隐私，Resource Limits�
 
 
 章节8:
-ConfigMap（公告板）：贴一些公共配置信息
-Volume（移动储物柜）：数据持久化存储
-**Secret使用建议：**
+Pod装修进阶：公告板和储物柜的艺术 📋
+
+大家好！上次我们给共享宿舍装了保险箱和限电器，今天继续装修大业，聊聊另外两个必备神器：公告板和储物柜！毕竟，一个完美的宿舍不仅要安全（Secret），还要有序（ConfigMap）和实用（Volume）。
+
+今日装修清单：
+ConfigMap（公告板）：贴一些公共配置信息，让大家都知道WiFi密码，啥时候停水停电等
+Volume（移动储物柜）：数据持久化存储，重要东西不能丢
+
+ConfigMap：宿舍里的智能公告板，就像宿舍门口贴个智能公告板，写着WiFi密码、垃圾分类规则、外卖电话等公共信息
+配置信息要公开透明（不像Secret那么神秘）
+多个应用共享配置（大家都用同一个WiFi）
+配置变更要方便（换个WiFi密码不用重装系统）
+
+注意点：
+不要把敏感信息放公告板上（那是保险箱的活）
+配置变更后记得重启Pod（公告板更新了要通知大家）
+合理组织配置结构（不要把公告板贴得乱七八糟）
+
+ConfigMap的创建：
+```yaml
+# 智能公告板配置
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dorm-config
+data:
+  wifi-password: "dorm123456"
+  takeout-phone: "400-123-4567"
+  cleaning-schedule: "Monday: 小明, Tuesday: 小红"
+  app.properties: |
+    server.port=8080
+    database.url=jdbc:mysql://localhost:3306/mydb
+    log.level=INFO
+```
+
+
+Volume：宿舍里的移动储物柜
+工作原理： 就像给宿舍配个移动储物柜，重要东西放里面，搬家时也能带走
+数据要持久化（Pod重启数据不能丢）
+多个容器共享数据（舍友之间共享文件）
+数据要备份（重要文件不能只存一份）
+
+注意点：
+选择合适的存储类型（临时用emptyDir，持久用PVC）
+注意挂载路径冲突（不要把两个储物柜放同一个位置）
+定期备份重要数据（储物柜也可能丢失）
+
+Volume的类型：
+emptyDir：临时储物箱，Pod删除时数据就没了；缓存文件、临时日志
+hostPath：就像借用房东家的储物间，数据存在节点上；需要访问节点文件系统
+persistentVolumeClaim：就像租个专业储物柜，数据永久保存；数据库文件、用户上传文件
+
+
+实际装修案例：给nginx宿舍升级装修
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-decorate-v2
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: nginx-decorate
+  template:
+    metadata:
+      labels:
+        app: nginx-decorate
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:latest
+        # 从公告板读取配置
+        env:
+        - name: SERVER_NAME
+          valueFrom:
+            configMapKeyRef:
+              name: nginx-config
+              key: server-name
+        # 挂载储物柜
+        volumeMounts:
+        - name: nginx-config-volume
+          mountPath: /etc/nginx/conf.d
+        - name: nginx-data-volume
+          mountPath: /usr/share/nginx/html
+        - name: nginx-logs-volume
+          mountPath: /var/log/nginx
+        ports:
+        - containerPort: 80
+      volumes:
+      # 公告板挂载
+      - name: nginx-config-volume
+        configMap:
+          name: nginx-config
+      # 数据储物柜
+      - name: nginx-data-volume
+        persistentVolumeClaim:
+          claimName: nginx-data-pvc
+      # 日志储物柜
+      - name: nginx-logs-volume
+        emptyDir: {}
+```
+
+装修后：
+- ✅ 智能公告板（ConfigMap）：配置管理
+- ✅ 移动储物柜（Volume）：数据持久化
+- ✅ 就像从经济型酒店升级到五星级套房
+
+总结
+第二轮装修后：Secret保险箱守护隐私，ConfigMap公告板分享信息，Volume储物柜保存数据，Resource Limits限电器控制资源，宿舍生活越来越好了！
+
+
+章节9:
+Pod装修终极版：选宿舍楼的艺术与准入指南 �
+
+大家好！前面我们给共享宿舍装了保险箱、限电器、公告板、储物柜，今天来聊聊最高级的装修技能：选宿舍楼！住哪栋楼直接影响居住体验。
+
+选楼指南
+
+Node Affinity（选楼偏好）：我想住哪种类型的楼
+Pod Affinity（邻居偏好）：我想住在某些服务附近
+Pod Anti-Affinity（避坑指南）：我绝对不和某些应用住同楼
+Taint/Toleration（准入制度）：特殊楼栋需要通行证
+
+Node Affinity：选楼类型 🏢
+
+工作原理： 根据楼栋设施选择，就像"我只住有空调的楼"
+
+使用场景：
+- GPU应用要住有显卡的楼
+- 就近部署，降低网络延迟
+
+Pod Affinity：选邻居 🤝
+
+工作原理： 选择"靠近图书馆的宿舍"，希望和某些服务住得近
+
+使用场景：
+- Web应用住在缓存服务附近，降低延迟
+- 相关服务住一起，方便数据共享
+
+Pod Anti-Affinity：避坑指南 ⚡
+
+工作原理： "避雷指南"，绝对不和某些应用住同一栋楼
+
+使用场景：
+- 多个副本分散部署，避免"一锅端"
+- CPU密集型应用分开，避免抢资源
+
+Taint & Toleration：准入制度 🏷️
+
+工作原理： 给楼栋贴标签"仅限研究生"，只有符合条件的应用才能入住
+
+Taint（楼栋标签）： 管理员设置准入要求
+Toleration（通行证）： 应用声明资格
+
+选楼策略对比 📊
+
+| 策略类型 | 作用 | 使用场景 |
+|---------|------|----------|
+| Node Affinity | 选楼栋类型 | 选择特定硬件节点 |
+| Pod Affinity | 选邻居 | 服务间协作优化 |
+| Pod Anti-Affinity | 避坑指南 | 高可用分散部署 |
+| Taint/Toleration | 准入制度 | 专用节点管理 |
+
+调度策略优先级 🎯
+
+Required（硬性要求）： 必须满足，否则不能入住
+Preferred（软性偏好）： 尽量满足，但不是必须的
+
+实际选楼案例 🏗️
+
+高可用Web应用需求：
+- 3个副本分散部署（避免单点故障）
+- 希望住在缓存服务附近（提高性能）
+- 只能住计算型节点（硬件要求）
+
+选楼策略：
+- Node Affinity：只选计算型楼栋
+- Pod Affinity：优先靠近Redis缓存
+- Pod Anti-Affinity：3个副本住不同楼栋
+
+常见搭配 🏠
+
+黄金搭配：
+- Web服务靠近缓存：降低延迟
+- 数据库主从分离：提高可用性
+
+避坑组合：
+- 多个数据库副本：绝对不能住同楼
+- CPU密集型应用：要分散部署
+
+选楼小贴士 💡
+
+- 不要设置过多限制：可能导致无楼可住
+- 专用楼栋才设Taint：普通楼不要随便贴标签
+- 考虑集群规模：小集群别设太严格要求
+
+一句话总结 🎯
+
+Pod终极装修：Node Affinity选楼栋，Pod Affinity/Anti-Affinity管邻居，Taint/Toleration控门槛，科学选楼让每个Pod都住得舒心！ 🏠
+
+Secret使用建议：
 不要把Secret当成ConfigMap用（保险箱不是公告板）
 定期更换密码（就像定期换锁）
 权限控制要严格（不是谁都能开保险箱）
-**Resource设置建议：**
+Resource设置建议：
 requests设置要合理：太低影响性能，太高浪费资源
 limits要有上限：防止"电老虎"把邻居也搞停电
 监控资源使用：定期检查是否需要"扩容电路"
 
-## 一句话总结 🎯
+一句话总结 🎯
 
 *记住：好的Pod配置就像好的室友，既保护自己的隐私，又不影响别人的正常生活！* 😊
