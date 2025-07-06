@@ -19,10 +19,67 @@ spec:
           image: nginx:latest
           ports:
             - containerPort: 80
+---
+# ClusterIP Service (集群内部访问)
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-service
+  labels:
+    app: nginx-ds
+spec:
+  selector:
+    app: nginx-ds
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+  type: ClusterIP
+
+-------------------------
+# deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deployment
+  labels:
+    app: nginx-demo
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: nginx-demo
+  template:
+    metadata:
+      labels:
+        app: nginx-demo
+    spec:
+      containers:
+        - name: nginx
+          image: nginx:latest
+          ports:
+            - containerPort: 80
+---
+# ClusterIP Service (集群内部访问)
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-service
+  labels:
+    app: nginx-demo
+spec:
+  selector:
+    app: nginx-demo
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+  type: ClusterIP
 
 kubectl apply -f daemonset.yaml:
    nginx-daemonset-2x9kq
 
+-------------------------
 # statefulset.yaml
 apiVersion: apps/v1
 kind: StatefulSet
@@ -54,51 +111,28 @@ spec:
         resources:
           requests:
             storage: 1Gi
-
-kubectl apply -f statefulset.yaml:
-   nginx-statefulset-0
-   nginx-statefulset-1
-   nginx-statefulset-2
-
-# deployment.yaml
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: nginx-deployment
-  labels:
-    app: nginx-demo
-spec:
-  replicas: 3
-  selector:
-    matchLabels:
-      app: nginx-demo
-  template:
-    metadata:
-      labels:
-        app: nginx-demo
-    spec:
-      containers:
-        - name: nginx
-          image: nginx:latest
-          ports:
-            - containerPort: 80
-
 ---
-# ClusterIP Service (集群内部访问)
 apiVersion: v1
 kind: Service
 metadata:
-  name: nginx-service
+  name: nginx-ss-headless
   labels:
-    app: nginx-demo
+    app: nginx-ss
 spec:
   selector:
-    app: nginx-demo
+    app: nginx-ss
   ports:
     - protocol: TCP
       port: 80
       targetPort: 80
   type: ClusterIP
+  clusterIP: None
+--------------------------------
+kubectl apply -f statefulset.yaml:
+   nginx-statefulset-0
+   nginx-statefulset-1
+   nginx-statefulset-2
+
 
 ---
 # NodePort Service (外部访问)
@@ -142,8 +176,13 @@ kubectl apply -f deployment.yaml:
    nginx-deployment-7c8d6f7b5c-fghij
    nginx-deployment-7c8d6f7b5c-klmno
 
+kubectl run pod-busybox --image=docker.io/busybox -it --rm --command -- /bin/sh
+
 nslookup nginx-service
 wget -qO- nginx-service:80
+
+nslookup nginx-ss-headless
+wget -qO- nginx-statefulset-0.nginx-ss-headless:80
 
 ---
 apiVersion: apps/v1

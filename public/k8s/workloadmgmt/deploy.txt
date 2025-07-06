@@ -448,8 +448,9 @@ Taint & Toleration：准入制度 🏷️
 
 工作原理： 给楼栋贴标签"仅限研究生"，只有符合条件的应用才能入住
 
-Taint（楼栋标签）： 管理员设置准入要求
-Toleration（通行证）： 应用声明资格
+Taint（楼栋标签）： 管理员设置准入要求，即接受哪些人入住
+Toleration（通行证）： 应用声明资格，即声明我愿意入住一定标准的楼。
+二者结合，才能双向奔赴，达到最好的匹配状态
 
 选楼策略对比 📊
 
@@ -497,15 +498,224 @@ Preferred（软性偏好）： 尽量满足，但不是必须的
 
 Pod终极装修：Node Affinity选楼栋，Pod Affinity/Anti-Affinity管邻居，Taint/Toleration控门槛，科学选楼让每个Pod都住得舒心！ 🏠
 
-Secret使用建议：
-不要把Secret当成ConfigMap用（保险箱不是公告板）
-定期更换密码（就像定期换锁）
-权限控制要严格（不是谁都能开保险箱）
-Resource设置建议：
-requests设置要合理：太低影响性能，太高浪费资源
-limits要有上限：防止"电老虎"把邻居也搞停电
-监控资源使用：定期检查是否需要"扩容电路"
+章节10:
+Pod装修收尾工程：软装让生活更美好 ✨
+
+大家好！前面我们给共享宿舍进行了3轮硬装修，今天该来聊聊软装了！毕竟，硬装解决"能住"的问题，软装解决"住得好"的问题。
+
+核心问题：如何让宿舍生活更安全舒适？ 🏠
+
+软装三件套：
+Health Checks（健康监测）：安装智能健康检测设备
+Security Context（安全管家）：设置门禁权限和安全规则
+Init Containers（保洁阿姨）：入住前的清洁和准备工作
+
+Health Checks：宿舍里的智能健康管家
+
+工作原理： 就像给宿舍装个智能健康监测系统，随时检查住户的身体状况
+
+为什么需要Health Checks？
+- 及时发现问题：应用挂了要马上知道
+- 避免服务中断：不健康的Pod不接收流量
+- 自动恢复：检测到问题自动重启
+
+三种健康检查：
+
+1. Liveness Probe（生命体征检查）
+```yaml
+livenessProbe:
+  httpGet:
+    path: /health
+    port: 8080
+  initialDelaySeconds: 30
+  periodSeconds: 10
+```
+*就像每10秒问一次："你还活着吗？"如果连续几次没回应，就重启Pod*
+
+2. Readiness Probe（就绪检查）
+```yaml
+readinessProbe:
+  httpGet:
+    path: /ready
+    port: 8080
+  initialDelaySeconds: 5
+  periodSeconds: 5
+```
+*就像问："你准备好接客了吗？"没准备好就不给你分配流量*
+
+3. Startup Probe（启动检查）
+```yaml
+startupProbe:
+  httpGet:
+    path: /startup
+    port: 8080
+  failureThreshold: 30
+  periodSeconds: 10
+```
+*就像问："你启动完了吗？"给慢启动的应用更多时间*
+
+生动比喻：
+- Liveness = 心跳检测器，确保还活着
+- Readiness = 门铃，确认是否可以接待客人
+- Startup = 闹钟，确认是否已经起床
+
+Security Context：宿舍安全管家 🔐
+
+工作原理： 就像给宿舍配个专业安全管家，管理谁能进、谁能做什么
+
+为什么需要Security Context？
+- 权限控制：不是谁都能当管理员
+- 安全隔离：防止恶意操作
+- 合规要求：满足安全审计标准
+
+主要安全设置：
+
+1. 用户权限控制
+```yaml
+securityContext:
+  runAsUser: 1000        # 以普通用户身份运行
+  runAsGroup: 3000       # 设置用户组
+  runAsNonRoot: true     # 禁止以root运行
+```
+
+2. 文件系统权限
+```yaml
+securityContext:
+  fsGroup: 2000          # 文件系统用户组
+  readOnlyRootFilesystem: true  # 根文件系统只读
+```
+
+3. 特权控制
+```yaml
+securityContext:
+  allowPrivilegeEscalation: false  # 禁止提权
+  privileged: false                # 禁止特权模式
+  capabilities:
+    drop:
+    - ALL                          # 删除所有特权
+```
+
+生动比喻：
+- runAsUser = 给每个住户发身份证
+- readOnlyRootFilesystem = 把重要文件锁在保险柜里
+- capabilities = 限制住户的"超能力"
+
+Init Containers：专业保洁阿姨 🧹
+
+工作原理： 就像请专业保洁阿姨，在正式入住前把房间打扫干净、准备就绪
+
+为什么需要Init Containers？
+- 环境准备：数据库初始化、文件下载
+- 依赖检查：确保依赖服务已启动
+- 权限设置：修改文件权限、创建目录
+
+Init Container配置：
+```yaml
+initContainers:
+- name: init-myservice
+  image: busybox:1.28
+  command: ['sh', '-c', 'until nslookup myservice; do echo waiting for myservice; sleep 2; done;']
+- name: init-mydb
+  image: busybox:1.28
+  command: ['sh', '-c', 'until nslookup mydb; do echo waiting for mydb; sleep 2; done;']
+```
+
+工作流程：
+1. Init Container 1 执行完成
+2. Init Container 2 执行完成
+3. 主容器才开始启动
+
+生动比喻：
+- 像酒店的客房服务，客人入住前把一切准备好
+- 按顺序工作，前一个保洁阿姨干完，下一个才开始
+- 所有准备工作完成，客人才能入住
+
+软装配置实战案例 
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: webapp-deluxe
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: webapp-deluxe
+  template:
+    metadata:
+      labels:
+        app: webapp-deluxe
+    spec:
+      # 🧹 保洁阿姨先工作
+      initContainers:
+      - name: init-db-check
+        image: busybox
+        command: ['sh', '-c', 'until nc -z db-service 5432; do sleep 1; done']
+
+      containers:
+      - name: webapp
+        image: nginx:latest
+        ports:
+        - containerPort: 80
+
+        # 🏥 健康监测设备
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 30
+          periodSeconds: 10
+
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 5
+          periodSeconds: 5
+
+        # 🔐 安全管家设置
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 1000
+          readOnlyRootFilesystem: true
+          allowPrivilegeEscalation: false
+```
+
+软装效果对比 📊
+
+硬装完成后：
+- ✅ 有地方住（基础功能）
+- ✅ 安全存储（Secret、ConfigMap）
+- ✅ 资源管理（Resource Limits）
+- ✅ 位置优化（Affinity）
+
+软装完成后：
+- ✅ 健康监控（随时知道状态）
+- ✅ 安全防护（权限控制到位）
+- ✅ 环境整洁（Init Container准备）
+- ✅ 生活品质大幅提升
+
+软装小贴士 💡
+
+Health Checks建议：
+- 设置合理的检查间隔：太频繁浪费资源，太稀疏发现问题慢
+- 区分不同检查类型：Liveness检查要宽松，Readiness检查要严格
+- 提供专门的健康检查接口：不要用业务接口做健康检查
+
+Security Context建议：
+- 最小权限原则：能用普通用户就别用root
+- 只读文件系统：能只读就别可写
+- 定期审计：检查是否有不必要的权限
+
+Init Container建议：
+- 保持简单：Init Container应该做简单的准备工作
+- 快速执行：不要让Init Container运行太久
+- 幂等操作：多次执行结果应该一样
 
 一句话总结 🎯
 
-*记住：好的Pod配置就像好的室友，既保护自己的隐私，又不影响别人的正常生活！* 😊
+Pod软装三件套：Health Checks当健康管家随时体检，Security Context当安全管家控制权限，Init Containers当保洁阿姨提前准备，让你的Pod住得安全、舒适、放心！ 🏠
+
+*记住：硬装让Pod能跑起来，软装让Pod跑得更好！* ✨
+
