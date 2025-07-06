@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LLMs from Scratch - Chapter 5: Pretraining Process</title>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 100%;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+        .mermaid {
+            text-align: center;
+            margin: 20px 0;
+        }
+        .navigation {
+            text-align: center;
+            margin: 20px 0;
+        }
+        .nav-button {
+            display: inline-block;
+            margin: 0 10px;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        .nav-button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 Chapter 5: Pretraining Process</h1>
+        
+        <div class="navigation">
+            <a href="05-chapter-4.html" class="nav-button">← GPT Architecture</a>
+            <a href="07-chapters-6-7.html" class="nav-button">Next: Finetuning →</a>
+        </div>
+        
+        <div class="mermaid">
+mindmap
+  root((Chapter 5: Pretraining))
+    Training Loop Implementation
+      Data Pipeline
+        Dataset Loading
+        Batch Creation
+        Shuffling Strategy
+        Memory Management
+      
+      Forward Pass
+        Loss Calculation
+        Gradient Computation
+        Backpropagation
+        Parameter Updates
+      
+      Optimization
+        Adam Optimizer
+        Learning Rate Scheduling
+        Gradient Clipping
+        Weight Decay
+      
+      Monitoring
+        Loss Tracking
+        Perplexity Metrics
+        Training Progress
+        Validation Checks
+    
+    Model Management
+      Checkpointing
+        Save Strategies
+        Resume Training
+        Best Model Selection
+        Storage Management
+      
+      Model Loading
+        State Dict Handling
+        Configuration Management
+        Version Compatibility
+        Error Handling
+      
+      Evaluation
+        Validation Loss
+        Generation Quality
+        Benchmark Testing
+        Performance Metrics
+    
+    Advanced Generation
+      Sampling Improvements
+        Temperature Scaling
+        Top-k Refinements
+        Top-p Optimization
+        Repetition Penalties
+      
+      Context Management
+        Sliding Windows
+        Memory Efficiency
+        Long Sequences
+        Truncation Strategies
+      
+      Batch Generation
+        Parallel Processing
+        Memory Optimization
+        Speed Improvements
+        Quality Consistency
+    
+    Training Optimization
+      Learning Rate Strategies
+        Warmup Schedules
+        Decay Patterns
+        Adaptive Methods
+        Plateau Detection
+      
+      Regularization
+        Dropout Techniques
+        Weight Decay
+        Gradient Noise
+        Early Stopping
+      
+      Hardware Utilization
+        GPU Optimization
+        Memory Management
+        Distributed Training
+        Mixed Precision
+      
+      Debugging and Monitoring
+        Loss Curves Analysis
+        Gradient Monitoring
+        Activation Statistics
+        Performance Profiling
+        </div>
+        
+        <div class="navigation">
+            <a href="05-chapter-4.html" class="nav-button">← GPT Architecture</a>
+            <a href="07-chapters-6-7.html" class="nav-button">Next: Finetuning →</a>
+        </div>
+    </div>
+    
+    <script>
+        mermaid.initialize({ 
+            startOnLoad: true,
+            theme: 'default',
+            mindmap: {
+                useMaxWidth: true,
+                htmlLabels: true
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LLMs from Scratch - Chapters 1-2: Foundations</title>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 100%;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+        .mermaid {
+            text-align: center;
+            margin: 20px 0;
+        }
+        .navigation {
+            text-align: center;
+            margin: 20px 0;
+        }
+        .nav-button {
+            display: inline-block;
+            margin: 0 10px;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        .nav-button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📖 Chapters 1-2: Foundations & Text Data</h1>
+        
+        <div class="navigation">
+            <a href="02-core-learning-path.html" class="nav-button">← Learning Path</a>
+            <a href="04-chapter-3.html" class="nav-button">Next: Attention →</a>
+        </div>
+        
+        <div class="mermaid">
+flowchart TD
+    A[Chapters 1-2] --> B[Chapter 1: Understanding LLMs]
+    A --> C[Chapter 2: Text Data & Tokenization]
+
+    B --> B1[What are LLMs]
+    B --> B2[Key Concepts]
+    B --> B3[Historical Context]
+    B --> B4[No Code Required]
+
+    B1 --> B1a[Large Language Models]
+    B1 --> B1b[Transformer Architecture]
+    B1 --> B1c[Generative AI]
+    B1 --> B1d[Applications]
+
+    B2 --> B2a[Tokens and Embeddings]
+    B2 --> B2b[Context Windows]
+    B2 --> B2c[Parameters and Scale]
+    B2 --> B2d[Training vs Inference]
+
+    B3 --> B3a[Evolution of NLP]
+    B3 --> B3b[From RNNs to Transformers]
+    B3 --> B3c[GPT Family]
+    B3 --> B3d[Current Landscape]
+
+    B4 --> B4a[Conceptual Understanding]
+    B4 --> B4b[Mental Models]
+    B4 --> B4c[Foundation Knowledge]
+    B4 --> B4d[Preparation for Implementation]
+
+    C --> C1[Text Preprocessing]
+    C --> C2[Tokenization Methods]
+    C --> C3[BPE Implementation]
+    C --> C4[tiktoken Library]
+    C --> C5[Data Loading]
+    C --> C6[Practical Exercises]
+
+    C1 --> C1a[Data Cleaning]
+    C1 --> C1b[Normalization]
+    C1 --> C1c[Handling Special Characters]
+    C1 --> C1d[Unicode Considerations]
+
+    C2 --> C2a[Word-level Tokenization]
+    C2 --> C2b[Character-level Tokenization]
+    C2 --> C2c[Subword Tokenization]
+    C2 --> C2d[Byte Pair Encoding BPE]
+
+    C3 --> C3a[Algorithm Understanding]
+    C3 --> C3b[Vocabulary Building]
+    C3 --> C3c[Encoding Process]
+    C3 --> C3d[Decoding Process]
+
+    C4 --> C4a[OpenAI's Tokenizer]
+    C4 --> C4b[Installation and Setup]
+    C4 --> C4c[Basic Usage]
+    C4 --> C4d[Advanced Features]
+
+    C5 --> C5a[Dataset Formats]
+    C5 --> C5b[Batch Processing]
+    C5 --> C5c[Memory Management]
+    C5 --> C5d[Streaming Large Files]
+
+    C6 --> C6a[Implement Simple Tokenizer]
+    C6 --> C6b[Compare Different Methods]
+    C6 --> C6c[Analyze Token Distributions]
+    C6 --> C6d[Handle Edge Cases]
+
+        </div>
+        
+        <div class="navigation">
+            <a href="02-core-learning-path.html" class="nav-button">← Learning Path</a>
+            <a href="04-chapter-3.html" class="nav-button">Next: Attention →</a>
+        </div>
+    </div>
+    
+    <script>
+        mermaid.initialize({ 
+            startOnLoad: true,
+            theme: 'default',
+            flowchart: {
+                useMaxWidth: true,
+                htmlLabels: true
+            }
+        });
+    </script>
+</body>
+</html>

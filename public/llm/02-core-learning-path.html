@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LLMs from Scratch - Core Learning Path</title>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 100%;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+        .mermaid {
+            text-align: center;
+            margin: 20px 0;
+        }
+        .navigation {
+            text-align: center;
+            margin: 20px 0;
+        }
+        .nav-button {
+            display: inline-block;
+            margin: 0 10px;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        .nav-button:hover {
+            background-color: #0056b3;
+        }
+        .chapter-links {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .chapter-link {
+            padding: 15px;
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            text-align: center;
+            text-decoration: none;
+            color: #333;
+            transition: all 0.3s;
+        }
+        .chapter-link:hover {
+            background-color: #e9ecef;
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📚 Core Learning Path Overview</h1>
+        
+        <div class="navigation">
+            <a href="01-setup-environment.html" class="nav-button">← Setup</a>
+            <a href="llms_mindmap.html" class="nav-button">Overview</a>
+            <a href="03-chapters-1-2.html" class="nav-button">Start Learning →</a>
+        </div>
+        
+        <div class="mermaid">
+flowchart TD
+    A[Core Learning Path] --> B[Chapter 1: Understanding LLMs]
+    A --> C[Chapter 2: Text Data & Tokenization]
+    A --> D[Chapter 3: Attention Mechanisms]
+    A --> E[Chapter 4: GPT Model Architecture]
+    A --> F[Chapter 5: Pretraining Process]
+    A --> G[Chapter 6: Classification Finetuning]
+    A --> H[Chapter 7: Instruction Finetuning]
+
+    B --> B1[Concepts Only]
+    B --> B2[No Code]
+    B --> B3[Mental Models]
+    B --> B4[Foundation Knowledge]
+
+    C --> C1[BPE Encoding]
+    C --> C2[tiktoken]
+    C --> C3[Data Loading]
+    C --> C4[Batch Processing]
+
+    D --> D1[Self Attention]
+    D --> D2[Causal Attention]
+    D --> D3[Multi-Head Attention]
+    D --> D4[Efficient Implementations]
+
+    E --> E1[Core Components]
+    E --> E2[Complete Model]
+    E --> E3[Text Generation]
+    E --> E4[Performance Analysis]
+
+    F --> F1[Training Loop]
+    F --> F2[Model Management]
+    F --> F3[Advanced Generation]
+    F --> F4[Optimization]
+
+    G --> G1[Dataset Handling]
+    G --> G2[Training Process]
+    G --> G3[Model Evaluation]
+    G --> G4[Performance Metrics]
+
+    H --> H1[Dataset Preparation]
+    H --> H2[Instruction Following]
+    H --> H3[Quality Assessment]
+    H --> H4[Advanced Techniques]
+        </div>
+        
+        <div class="chapter-links">
+            <a href="03-chapters-1-2.html" class="chapter-link">
+                <strong>Chapters 1-2</strong><br>
+                Foundations & Text Data
+            </a>
+            <a href="04-chapter-3.html" class="chapter-link">
+                <strong>Chapter 3</strong><br>
+                Attention Mechanisms
+            </a>
+            <a href="05-chapter-4.html" class="chapter-link">
+                <strong>Chapter 4</strong><br>
+                GPT Model Architecture
+            </a>
+            <a href="06-chapter-5.html" class="chapter-link">
+                <strong>Chapter 5</strong><br>
+                Pretraining Process
+            </a>
+            <a href="07-chapters-6-7.html" class="chapter-link">
+                <strong>Chapters 6-7</strong><br>
+                Finetuning Techniques
+            </a>
+            <a href="08-advanced-topics.html" class="chapter-link">
+                <strong>Advanced Topics</strong><br>
+                Appendices & Extensions
+            </a>
+        </div>
+        
+        <div class="navigation">
+            <a href="01-setup-environment.html" class="nav-button">← Setup</a>
+            <a href="llms_mindmap.html" class="nav-button">Overview</a>
+            <a href="03-chapters-1-2.html" class="nav-button">Start Learning →</a>
+        </div>
+    </div>
+    
+    <script>
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'default',
+            flowchart: {
+                useMaxWidth: true,
+                htmlLabels: true
+            }
+        });
+    </script>
+</body>
+</html>

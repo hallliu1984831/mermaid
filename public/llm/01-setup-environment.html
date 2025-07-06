@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LLMs from Scratch - Setup & Environment</title>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 100%;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+        .mermaid {
+            text-align: center;
+            margin: 20px 0;
+        }
+        .navigation {
+            text-align: center;
+            margin: 20px 0;
+        }
+        .nav-button {
+            display: inline-block;
+            margin: 0 10px;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        .nav-button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🛠️ Setup & Environment</h1>
+        
+        <div class="navigation">
+            <a href="llms_mindmap.html" class="nav-button">← Overview</a>
+            <a href="02-core-learning-path.html" class="nav-button">Next: Core Learning →</a>
+        </div>
+        
+        <div class="mermaid">
+flowchart TD
+    A[Setup & Environment] --> B[Python Setup]
+    A --> C[Package Installation]
+    A --> D[Docker Environment]
+    A --> E[Hardware Requirements]
+    A --> F[Development Workflow]
+
+    B --> B1[Python 3.8+]
+    B --> B2[Virtual Environment]
+    B --> B3[IDE Setup]
+    B2 --> B2a[venv]
+    B2 --> B2b[conda]
+    B2 --> B2c[poetry]
+    B3 --> B3a[VS Code]
+    B3 --> B3b[PyCharm]
+    B3 --> B3c[Jupyter]
+
+    C --> C1[Core Dependencies]
+    C --> C2[Development Tools]
+    C --> C3[Optional Packages]
+    C1 --> C1a[torch]
+    C1 --> C1b[transformers]
+    C1 --> C1c[tiktoken]
+    C1 --> C1d[matplotlib]
+    C2 --> C2a[pytest]
+    C2 --> C2b[black]
+    C2 --> C2c[flake8]
+    C2 --> C2d[mypy]
+    C3 --> C3a[wandb]
+    C3 --> C3b[tensorboard]
+    C3 --> C3c[datasets]
+
+    D --> D1[Base Images]
+    D --> D2[Container Setup]
+    D --> D3[Docker Compose]
+    D1 --> D1a[python:3.9-slim]
+    D1 --> D1b[pytorch/pytorch]
+    D2 --> D2a[GPU Support]
+    D2 --> D2b[Volume Mounting]
+    D2 --> D2c[Port Mapping]
+    D3 --> D3a[Multi-service Setup]
+    D3 --> D3b[Development Environment]
+
+    E --> E1[Minimum Setup]
+    E --> E2[Recommended Setup]
+    E --> E3[Production Setup]
+    E1 --> E1a[8GB RAM]
+    E1 --> E1b[CPU Training]
+    E1 --> E1c[Local Development]
+    E2 --> E2a[16GB+ RAM]
+    E2 --> E2b[GPU RTX 3060+]
+    E2 --> E2c[SSD Storage]
+    E3 --> E3a[32GB+ RAM]
+    E3 --> E3b[Multiple GPUs]
+    E3 --> E3c[High-speed Storage]
+
+    F --> F1[Version Control]
+    F --> F2[Testing Strategy]
+    F --> F3[Documentation]
+    F1 --> F1a[Git Setup]
+    F1 --> F1b[GitHub/GitLab]
+    F1 --> F1c[Branch Strategy]
+    F2 --> F2a[Unit Tests]
+    F2 --> F2b[Integration Tests]
+    F2 --> F2c[Performance Tests]
+    F3 --> F3a[Code Comments]
+    F3 --> F3b[README Files]
+    F3 --> F3c[API Documentation]
+        </div>
+        
+        <div class="navigation">
+            <a href="llms_mindmap.html" class="nav-button">← Overview</a>
+            <a href="02-core-learning-path.html" class="nav-button">Next: Core Learning →</a>
+        </div>
+    </div>
+    
+    <script>
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'default',
+            flowchart: {
+                useMaxWidth: true,
+                htmlLabels: true
+            }
+        });
+    </script>
+</body>
+</html>

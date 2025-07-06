@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LLMs from Scratch - Chapters 6-7: Finetuning Techniques</title>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 100%;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+        .mermaid {
+            text-align: center;
+            margin: 20px 0;
+        }
+        .navigation {
+            text-align: center;
+            margin: 20px 0;
+        }
+        .nav-button {
+            display: inline-block;
+            margin: 0 10px;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        .nav-button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 Chapters 6-7: Finetuning Techniques</h1>
+        
+        <div class="navigation">
+            <a href="06-chapter-5.html" class="nav-button">← Pretraining</a>
+            <a href="08-advanced-topics.html" class="nav-button">Next: Advanced Topics →</a>
+        </div>
+        
+        <div class="mermaid">
+mindmap
+  root((Chapters 6-7: Finetuning))
+    Chapter 6: Classification Finetuning
+      Dataset Handling
+        Data Preparation
+          Text Classification Tasks
+          Label Processing
+          Train/Val/Test Splits
+          Data Augmentation
+        
+        Dataset Classes
+          Custom Dataset Implementation
+          Tokenization Integration
+          Batch Processing
+          Memory Optimization
+      
+      Training Process
+        Model Adaptation
+          Classification Head
+          Frozen vs Unfrozen Layers
+          Learning Rate Strategies
+          Transfer Learning
+        
+        Training Loop
+          Loss Functions
+          Optimization
+          Validation
+          Early Stopping
+      
+      Model Evaluation
+        Performance Metrics
+          Accuracy
+          Precision/Recall
+          F1 Score
+          Confusion Matrix
+        
+        Analysis Tools
+          Error Analysis
+          Prediction Confidence
+          Model Interpretability
+          Performance Visualization
+    
+    Chapter 7: Instruction Finetuning
+      Dataset Preparation
+        Instruction Datasets
+          Format Requirements
+          Quality Standards
+          Diversity Considerations
+          Size Requirements
+        
+        Data Processing
+          Prompt Engineering
+          Response Formatting
+          Special Token Handling
+          Context Management
+      
+      Instruction Following
+        Training Objectives
+          Next Token Prediction
+          Instruction Adherence
+          Response Quality
+          Safety Considerations
+        
+        Model Adaptation
+          Architecture Modifications
+          Training Strategies
+          Hyperparameter Tuning
+          Convergence Monitoring
+      
+      Quality Assessment
+        Evaluation Metrics
+          Instruction Following
+          Response Relevance
+          Factual Accuracy
+          Safety Compliance
+        
+        Human Evaluation
+          Rating Systems
+          Comparative Analysis
+          Bias Detection
+          Quality Assurance
+      
+      Advanced Techniques
+        RLHF Preparation
+          Reward Model Training
+          Policy Optimization
+          Human Feedback Integration
+          Alignment Techniques
+        
+        Specialized Training
+          Few-shot Learning
+          In-context Learning
+          Chain-of-thought
+          Multi-task Learning
+        </div>
+        
+        <div class="navigation">
+            <a href="06-chapter-5.html" class="nav-button">← Pretraining</a>
+            <a href="08-advanced-topics.html" class="nav-button">Next: Advanced Topics →</a>
+        </div>
+    </div>
+    
+    <script>
+        mermaid.initialize({ 
+            startOnLoad: true,
+            theme: 'default',
+            mindmap: {
+                useMaxWidth: true,
+                htmlLabels: true
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LLMs from Scratch - Learning Mindmap</title>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 100%;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+        .mermaid {
+            text-align: center;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧠 LLMs from Scratch - Learning Journey</h1>
+
+        <div style="text-align: center; margin: 20px 0;">
+            <p><strong>📚 Choose your learning path below:</strong></p>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; margin: 20px 0;">
+                <a href="01-setup-environment.html" style="padding: 15px; background-color: #e3f2fd; border: 1px solid #2196f3; border-radius: 8px; text-decoration: none; color: #1976d2; transition: all 0.3s;">
+                    <strong>🛠️ Setup & Environment</strong><br>
+                    <small>Get your development environment ready</small>
+                </a>
+                <a href="02-core-learning-path.html" style="padding: 15px; background-color: #f3e5f5; border: 1px solid #9c27b0; border-radius: 8px; text-decoration: none; color: #7b1fa2; transition: all 0.3s;">
+                    <strong>📚 Core Learning Path</strong><br>
+                    <small>Navigate through all chapters</small>
+                </a>
+                <a href="03-chapters-1-2.html" style="padding: 15px; background-color: #e8f5e8; border: 1px solid #4caf50; border-radius: 8px; text-decoration: none; color: #388e3c; transition: all 0.3s;">
+                    <strong>📖 Start Learning</strong><br>
+                    <small>Begin with Chapters 1-2</small>
+                </a>
+            </div>
+        </div>
+
+        <div class="mermaid">
+      mindmap
+        root((LLMs from Scratch))
+          Setup & Environment
+            Python Setup
+            Package Installation
+            Docker Environment
+            Hardware Requirements
+          
+          Core Learning Path
+            Ch1: Understanding LLMs
+              Concepts Only
+              No Code
+              Mental Models
+            
+            Ch2: Text Data
+              Tokenization
+                BPE Encoding
+                tiktoken
+                Custom Tokenizers
+              Data Loading
+                GPTDatasetV1
+                create_dataloader_v1
+                Batch Processing
+              Bonus Materials
+                BPE from Scratch
+                Embedding vs MatMul
+                Dataloader Intuition
+            
+            Ch3: Attention Mechanisms
+              Self Attention
+                SelfAttention_v1
+                SelfAttention_v2
+              Causal Attention
+                Masking
+                CausalAttention
+              Multi-Head Attention
+                MultiHeadAttention
+                PyTorchMultiHeadAttention
+              Bonus Materials
+                Efficient Implementations
+                PyTorch Buffers
+            
+            Ch4: GPT Model
+              Core Components
+                LayerNorm
+                GELU Activation
+                FeedForward
+                TransformerBlock
+              Complete Model
+                GPTModel
+                GPTModelFast
+              Text Generation
+                generate_text_simple
+                Sampling Strategies
+              Bonus Materials
+                FLOPS Analysis
+                Performance Optimization
+            
+            Ch5: Pretraining
+              Training Loop
+                train_model_simple
+                Loss Calculation
+                Evaluation Metrics
+              Model Management
+                Weight Loading
+                State Dict Handling
+              Text Generation
+                Advanced Generation
+                Temperature Sampling
+              Bonus Materials
+                Gutenberg Dataset
+                Learning Rate Schedulers
+                Hyperparameter Tuning
+                User Interface
+                GPT to Llama Conversion
+                Memory Efficiency
+                Training Speed Optimization
+            
+            Ch6: Classification Finetuning
+              Dataset Handling
+                Spam Detection
+                Balanced Datasets
+                SpamDataset
+              Training Process
+                train_classifier_simple
+                Accuracy Calculation
+              Model Evaluation
+                Performance Metrics
+                Classification Tasks
+              Bonus Materials
+                IMDB Classification
+                Layer-wise Finetuning
+                User Interface
+            
+            Ch7: Instruction Finetuning
+              Dataset Preparation
+                Instruction Datasets
+                Data Formatting
+                Custom Collate Functions
+              Training Process
+                Instruction Following
+                Response Generation
+              Model Evaluation
+                Quality Assessment
+                Ollama Integration
+              Bonus Materials
+                Dataset Generation
+                Preference Tuning (DPO)
+                Model Evaluation Tools
+                User Interface
+          
+          Advanced Topics
+            Appendix A: PyTorch Basics
+              Neural Networks
+              Data Handling
+              Distributed Training
+            
+            Appendix D: Training Enhancements
+              Gradient Analysis
+              Advanced Training Loops
+              Optimization Techniques
+            
+            Appendix E: LoRA
+              Parameter-Efficient Finetuning
+              Low-Rank Adaptation
+              Memory Optimization
+            
+            Llama Integration
+              Llama3Model
+              Llama3Tokenizer
+              Chat Formatting
+              RoPE Embeddings
+              Grouped Query Attention
+          
+          Package Structure
+            Importable Components
+              Chapter-wise Modules
+              Reusable Functions
+              Tested Components
+            
+            Testing Suite
+              Unit Tests
+              Integration Tests
+              Performance Tests
+            
+            Development Tools
+              PyPI Package
+              Editable Installation
+              Development Dependencies
+        </div>
+    </div>
+
+    <script>
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'default',
+            mindmap: {
+                useMaxWidth: true,
+                htmlLabels: true
+            }
+        });
+    </script>
+</body>
+</html>

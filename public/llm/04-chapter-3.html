@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LLMs from Scratch - Chapter 3: Attention Mechanisms</title>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 100%;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+        .mermaid {
+            text-align: center;
+            margin: 20px 0;
+        }
+        .navigation {
+            text-align: center;
+            margin: 20px 0;
+        }
+        .nav-button {
+            display: inline-block;
+            margin: 0 10px;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        .nav-button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 Chapter 3: Attention Mechanisms</h1>
+        
+        <div class="navigation">
+            <a href="03-chapters-1-2.html" class="nav-button">← Foundations</a>
+            <a href="05-chapter-4.html" class="nav-button">Next: GPT Architecture →</a>
+        </div>
+        
+        <div class="mermaid">
+mindmap
+  root((Chapter 3: Attention))
+    Self-Attention Basics
+      Core Concepts
+        Query, Key, Value
+        Attention Scores
+        Weighted Combinations
+        Information Flow
+      
+      Mathematical Foundation
+        Dot Product Attention
+        Scaled Attention
+        Softmax Normalization
+        Matrix Operations
+      
+      Implementation Steps
+        Linear Projections
+        Score Calculation
+        Attention Weights
+        Output Computation
+      
+      Code Examples
+        Simple Self-Attention
+        Step-by-Step Breakdown
+        Visualization Tools
+        Testing and Validation
+    
+    Causal Self-Attention
+      Masking Mechanism
+        Lower Triangular Mask
+        Future Token Blocking
+        Autoregressive Property
+        Sequence Generation
+      
+      Implementation Details
+        Mask Creation
+        Score Masking
+        Efficient Computation
+        Memory Optimization
+      
+      Practical Applications
+        Text Generation
+        Language Modeling
+        Sequence Prediction
+        Completion Tasks
+    
+    Multi-Head Attention
+      Parallel Processing
+        Multiple Attention Heads
+        Different Representations
+        Concatenation Strategy
+        Linear Combination
+      
+      Architecture Design
+        Head Dimension Calculation
+        Projection Matrices
+        Output Projection
+        Residual Connections
+      
+      Benefits and Trade-offs
+        Representation Diversity
+        Computational Complexity
+        Memory Requirements
+        Performance Gains
+      
+      Implementation
+        Head Splitting
+        Parallel Computation
+        Result Combination
+        Optimization Techniques
+    
+    Advanced Topics
+      Attention Patterns
+        Head Specialization
+        Pattern Analysis
+        Visualization Methods
+        Interpretability
+      
+      Efficiency Improvements
+        Sparse Attention
+        Linear Attention
+        Flash Attention
+        Memory Optimization
+      
+      Debugging and Testing
+        Gradient Checking
+        Shape Validation
+        Numerical Stability
+        Performance Profiling
+        </div>
+        
+        <div class="navigation">
+            <a href="03-chapters-1-2.html" class="nav-button">← Foundations</a>
+            <a href="05-chapter-4.html" class="nav-button">Next: GPT Architecture →</a>
+        </div>
+    </div>
+    
+    <script>
+        mermaid.initialize({ 
+            startOnLoad: true,
+            theme: 'default',
+            mindmap: {
+                useMaxWidth: true,
+                htmlLabels: true
+            }
+        });
+    </script>
+</body>
+</html>

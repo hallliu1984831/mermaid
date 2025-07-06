@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LLMs from Scratch - Chapter 4: GPT Model Architecture</title>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 100%;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+        .mermaid {
+            text-align: center;
+            margin: 20px 0;
+        }
+        .navigation {
+            text-align: center;
+            margin: 20px 0;
+        }
+        .nav-button {
+            display: inline-block;
+            margin: 0 10px;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        .nav-button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏗️ Chapter 4: GPT Model Architecture</h1>
+        
+        <div class="navigation">
+            <a href="04-chapter-3.html" class="nav-button">← Attention</a>
+            <a href="06-chapter-5.html" class="nav-button">Next: Pretraining →</a>
+        </div>
+        
+        <div class="mermaid">
+flowchart TD
+    A[Chapter 4: GPT Architecture] --> B[Core Components]
+    A --> C[Complete Model Assembly]
+    A --> D[Text Generation]
+    A --> E[Performance Analysis]
+
+    B --> B1[Token Embeddings]
+    B --> B2[Positional Embeddings]
+    B --> B3[Transformer Blocks]
+    B --> B4[Output Layer]
+
+    B1 --> B1a[Vocabulary Size]
+    B1 --> B1b[Embedding Dimension]
+    B1 --> B1c[Learned Representations]
+    B1 --> B1d[Initialization Strategies]
+
+    B2 --> B2a[Absolute Positioning]
+    B2 --> B2b[Learned vs Fixed]
+    B2 --> B2c[Context Window]
+    B2 --> B2d[Position Encoding]
+
+    B3 --> B3a[Multi-Head Attention]
+    B3 --> B3b[Feed-Forward Networks]
+    B3 --> B3c[Layer Normalization]
+    B3 --> B3d[Residual Connections]
+
+    B4 --> B4a[Language Modeling Head]
+    B4 --> B4b[Vocabulary Projection]
+    B4 --> B4c[Softmax Distribution]
+    B4 --> B4d[Next Token Prediction]
+
+    C --> C1[Model Configuration]
+    C --> C2[Forward Pass]
+    C --> C3[Parameter Management]
+
+    C1 --> C1a[Number of Layers]
+    C1 --> C1b[Hidden Dimensions]
+    C1 --> C1c[Attention Heads]
+    C1 --> C1d[Vocabulary Size]
+
+    C2 --> C2a[Input Processing]
+    C2 --> C2b[Block Stacking]
+    C2 --> C2c[Output Generation]
+    C2 --> C2d[Loss Calculation]
+
+    C3 --> C3a[Weight Initialization]
+    C3 --> C3b[Parameter Counting]
+    C3 --> C3c[Memory Requirements]
+    C3 --> C3d[Model Size Analysis]
+
+    D --> D1[Sampling Strategies]
+    D --> D2[Temperature Control]
+    D --> D3[Generation Loop]
+    D --> D4[Quality Assessment]
+
+    D1 --> D1a[Greedy Decoding]
+    D1 --> D1b[Random Sampling]
+    D1 --> D1c[Top-k Sampling]
+    D1 --> D1d[Top-p Nucleus Sampling]
+
+    D2 --> D2a[Randomness Adjustment]
+    D2 --> D2b[Output Diversity]
+    D2 --> D2c[Quality vs Creativity]
+    D2 --> D2d[Parameter Tuning]
+
+    D3 --> D3a[Autoregressive Process]
+    D3 --> D3b[Context Management]
+    D3 --> D3c[Stopping Criteria]
+    D3 --> D3d[Batch Generation]
+
+    D4 --> D4a[Perplexity Metrics]
+    D4 --> D4b[Human Evaluation]
+    D4 --> D4c[Coherence Analysis]
+    D4 --> D4d[Diversity Measures]
+
+    E --> E1[Model Efficiency]
+    E --> E2[Scaling Considerations]
+    E --> E3[Debugging Tools]
+
+    E1 --> E1a[Inference Speed]
+    E1 --> E1b[Memory Usage]
+    E1 --> E1c[Computational Complexity]
+    E1 --> E1d[Optimization Opportunities]
+
+    E2 --> E2a[Parameter Count Impact]
+    E2 --> E2b[Context Length Effects]
+    E2 --> E2c[Batch Size Trade-offs]
+    E2 --> E2d[Hardware Requirements]
+
+    E3 --> E3a[Activation Inspection]
+    E3 --> E3b[Gradient Analysis]
+    E3 --> E3c[Loss Monitoring]
+    E3 --> E3d[Generation Quality]
+        </div>
+        
+        <div class="navigation">
+            <a href="04-chapter-3.html" class="nav-button">← Attention</a>
+            <a href="06-chapter-5.html" class="nav-button">Next: Pretraining →</a>
+        </div>
+    </div>
+    
+    <script>
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'default',
+            flowchart: {
+                useMaxWidth: true,
+                htmlLabels: true
+            }
+        });
+    </script>
+</body>
+</html>
