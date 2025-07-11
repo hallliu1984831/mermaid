@@ -503,24 +503,17 @@ Pod装修收尾工程：软装让生活更美好 ✨
 
 大家好！前面我们给共享宿舍进行了3轮硬装修，今天该来聊聊软装了！毕竟，硬装解决"能住"的问题，软装解决"住得好"的问题。
 
-核心问题：如何让宿舍生活更安全舒适？ 🏠
-
 软装三件套：
 Health Checks（健康监测）：安装智能健康检测设备
 Security Context（安全管家）：设置门禁权限和安全规则
 Init Containers（保洁阿姨）：入住前的清洁和准备工作
 
-Health Checks：宿舍里的智能健康管家
-
-工作原理： 就像给宿舍装个智能健康监测系统，随时检查住户的身体状况
-
-为什么需要Health Checks？
+Health Checks：就像给宿舍装个智能健康监测系统，随时检查宿舍的各种状况
 - 及时发现问题：应用挂了要马上知道
 - 避免服务中断：不健康的Pod不接收流量
 - 自动恢复：检测到问题自动重启
 
 三种健康检查：
-
 1. Liveness Probe（生命体征检查）
 ```yaml
 livenessProbe:
@@ -530,7 +523,7 @@ livenessProbe:
   initialDelaySeconds: 30
   periodSeconds: 10
 ```
-*就像每10秒问一次："你还活着吗？"如果连续几次没回应，就重启Pod*
+就像每10秒问一次："你还活着吗？"如果连续几次没回应，就重启Pod
 
 2. Readiness Probe（就绪检查）
 ```yaml
@@ -541,7 +534,7 @@ readinessProbe:
   initialDelaySeconds: 5
   periodSeconds: 5
 ```
-*就像问："你准备好接客了吗？"没准备好就不给你分配流量*
+就像问："你准备好接客了吗？"没准备好就不给你分配流量
 
 3. Startup Probe（启动检查）
 ```yaml
@@ -552,14 +545,14 @@ startupProbe:
   failureThreshold: 30
   periodSeconds: 10
 ```
-*就像问："你启动完了吗？"给慢启动的应用更多时间*
+就像问："你启动完了吗？"给慢启动的应用更多时间
 
 生动比喻：
 - Liveness = 心跳检测器，确保还活着
 - Readiness = 门铃，确认是否可以接待客人
 - Startup = 闹钟，确认是否已经起床
 
-Security Context：宿舍安全管家 🔐
+Security Context：宿舍安全管家
 
 工作原理： 就像给宿舍配个专业安全管家，管理谁能进、谁能做什么
 
@@ -569,7 +562,6 @@ Security Context：宿舍安全管家 🔐
 - 合规要求：满足安全审计标准
 
 主要安全设置：
-
 1. 用户权限控制
 ```yaml
 securityContext:
@@ -647,7 +639,7 @@ spec:
       labels:
         app: webapp-deluxe
     spec:
-      # 🧹 保洁阿姨先工作
+      # 保洁阿姨先工作
       initContainers:
       - name: init-db-check
         image: busybox
@@ -659,7 +651,7 @@ spec:
         ports:
         - containerPort: 80
 
-        # 🏥 健康监测设备
+        # 健康监测设备
         livenessProbe:
           httpGet:
             path: /
@@ -674,7 +666,7 @@ spec:
           initialDelaySeconds: 5
           periodSeconds: 5
 
-        # 🔐 安全管家设置
+        # 安全管家设置
         securityContext:
           runAsNonRoot: true
           runAsUser: 1000
@@ -719,3 +711,423 @@ Pod软装三件套：Health Checks当健康管家随时体检，Security Context
 
 *记住：硬装让Pod能跑起来，软装让Pod跑得更好！* ✨
 
+章节11:
+Kubernetes Namespace: 大学校园的院系管理
+
+大家好！Kubernetes Pod 这个共享宿舍，在多篇连载的持续介绍下，加上操作视频的展示，基本介绍完毕。现在宿舍越来越多了，该考虑如何科学地分区管理了。就像一所大学有不同的院系一样，K8S 也需要用 Namespace 来划分不同的"院系"，让资源管理更有序。
+
+1️⃣ 核心问题：宿舍多了怎么管理？ 🤔
+按照常理，都需要按照专业职能来进行如下区分：
+👉 计算机科学系的学生住一片区域
+👉 物理系的学生住另一片区域
+👉 每个院系有自己的管理制度和资源
+
+2️⃣ Namespace：院系分区管理，就像大学把学生按院系分区管理，Namespace 把 K8s 资源按用途分组管理
+👉 资源隔离：计算机系的实验不会影响物理系
+👉 权限管理：每个院系有自己的管理员
+👉 命名冲突：不同院系可以有同名的实验室
+👉 资源配额：每个院系有自己的预算和资源限制
+
+3️⃣ 集群预置 Namespace
+👉 default（主校区）：就像大学的主校区，没有特别指定院系的都在这里
+“kubectl get pods” 默认显示default 命名空间的Pod
+
+👉 kube-system（行政管理区）：就像大学的行政楼，校长、教务处、后勤部门都在这里
+“kubectl get pods -n kube-system” 
+
+👉 kube-public（公共区域）：就像大学的图书馆、体育馆等公共设施
+kubectl get pods -n kube-public
+
+4️⃣ 创建 Namespace
+如图2，创建命名空间可使用命令行或者 yaml 文件，有了自定义的命名空间以后，就可以在它的地盘通过控制器来创建 Pod 了，如图3。
+
+5️⃣ Namespace的各项操作
+如图4：
+👉 跨院系的访问需要指定服务所在的 namespace 并符合特定的格式
+👉 查看各院系的部署对象、资源等（当然，你得有足够的权限才可以）
+👉 清理命名空间（这可是删库跑路的节奏🎵，需谨慎）
+
+6️⃣ Namespace就像大学的院系管理：不同院系有各自的学生、老师、实验室和预算，既保持独立又能协作，让整个校园井然有序！合理的院系划分是大学管理的基础，也是K8s集群管理的关键！
+
+
+1️⃣ 创建新院系
+👉 创建计算机科学系 (computer-science.yaml)：
+```yaml
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: computer-science
+  labels:
+    department: "cs"
+    budget: "high"
+```
+kubectl apply -f computer-science.yaml
+
+👉 命令行快速创建：
+```bash
+kubectl create namespace computer-science
+```
+
+2️⃣ 在指定院系部署应用 
+在计算机科学系部署Web应用：
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web-app
+  namespace: computer-science  # 指定院系
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: web-app
+  template:
+    metadata:
+      labels:
+        app: web-app
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:latest
+        ports:
+        - containerPort: 80
+```
+
+1️⃣ 跨院系访问 
+👉 院系内部访问（简单）：
+```bash
+# 在computer-science院系内
+curl http://web-service
+```
+👉 跨院系访问（需要全名）：
+```bash
+# 从computer-science访问physics的服务
+curl http://database-service.physics.svc.cluster.local
+```
+
+2️⃣ Kubernetes DNS命名规则：
+```
+<service-name>.<namespace>.<service-type>.cluster.local
+```
+
+3️⃣ 院系资源管理 
+查看各院系资源：
+```bash
+# 查看所有院系
+kubectl get namespaces
+# 查看计算机科学系的所有资源
+kubectl get all -n computer-science
+# 查看物理系的Pod
+kubectl get pods -n physics
+```
+
+4️⃣ 设置默认院系：
+```bash
+# 设置默认工作在computer-science院系
+kubectl config set-context --current --namespace=computer-science
+# 现在所有命令默认在CS院系执行
+kubectl get pods  # 等同于 kubectl get pods -n computer-science
+```
+
+5️⃣ 资源清理：
+```bash
+# 删除整个院系（谨慎操作！）
+kubectl delete namespace computer-science
+# 这会删除该院系下的所有资源
+```
+
+章节12:
+ResourceQuota：院系预算管理办公室 🏛️
+
+大家好！今天接着上篇的namespace，继续Kubernetes的资源管理话题。大学的院系（namespace）分好了，但问题来了：如果不加管理，计算机科学系可能把整个学校的电费都用光！今天聊聊如何给院系设预算。
+
+## 核心问题：如何防止某个院系把学校搞破产？ 🤔
+
+精细管理是稳步发展的关键，来看看下面的情况：
+
+👉 计算机科学系：挖矿、AI训练，电费爆表
+👉 物理系：粒子加速器24小时运转
+👉 化学系：各种设备全开，水电费飞涨
+👉 学校财务：这个月预算超支500%！😱
+
+这时候，需要ResourceQuota（院系预算管理办公室）来把关了！
+
+## ResourceQuota工作原理 💰
+
+**就像给每个院系设置年度预算**，超了就不能再申请资源，防止某个院系把所有资源都占了。
+
+**为什么需要ResourceQuota？**
+- 防止资源垄断：某个院系不能把所有资源都占了
+- 成本控制：每个院系有明确的资源预算
+- 公平分配：确保各院系都能获得合理资源
+- 避免雪崩：防止某个院系的问题影响整个集群
+
+回顾：Pod的个人资源设置 🏠
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: student-pod
+spec:
+  containers:
+  - name: app
+    image: nginx
+    resources:
+      requests:          # 保底需求
+        memory: "128Mi"   # 至少要128MB内存
+        cpu: "100m"       # 至少要0.1个CPU核心
+      limits:            # 最高上限
+        memory: "512Mi"   # 最多用512MB内存
+        cpu: "500m"       # 最多用0.5个CPU核心
+```
+
+- **requests** = 保证的基础用电量（1000W）
+- **limits** = 断路器设置（3000W，超了就跳闸）
+
+ResourceQuota：院系预算管理办公室 🏛️
+
+给每个院系设置年度预算，超了就不能再申请资源，防止某个院系把所有资源都占了。
+
+**计算机科学系的预算设置：**
+```yaml
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: cs-budget
+  namespace: computer-science
+spec:
+  hard:
+    # CPU和内存总预算
+    requests.cpu: "10"           # 总共10个CPU核心
+    requests.memory: 20Gi        # 总共20GB内存
+    limits.cpu: "20"             # 最高峰值20个CPU核心
+    limits.memory: 40Gi          # 最高峰值40GB内存
+
+    # 对象数量限制
+    pods: "50"                   # 最多50个Pod（50个学生）
+    services: "10"               # 最多10个Service
+    secrets: "20"                # 最多20个Secret
+    configmaps: "30"             # 最多30个ConfigMap
+
+    # 存储预算
+    persistentvolumeclaims: "10" # 最多10个存储申请
+    requests.storage: 100Gi      # 总共100GB存储
+```
+
+**物理系的预算设置（预算较少）：**
+```yaml
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: physics-budget
+  namespace: physics
+spec:
+  hard:
+    requests.cpu: "5"            # 总共5个CPU核心
+    requests.memory: 10Gi        # 总共10GB内存
+    limits.cpu: "10"             # 最高峰值10个CPU核心
+    limits.memory: 20Gi          # 最高峰值20GB内存
+    pods: "20"                   # 最多20个Pod
+    services: "5"                # 最多5个Service
+```
+
+## 实际效果演示 🎬
+
+**创建超预算的Pod会怎样？**
+```yaml
+# 尝试在physics系创建大内存Pod
+apiVersion: v1
+kind: Pod
+metadata:
+  name: big-pod
+  namespace: physics
+spec:
+  containers:
+  - name: app
+    image: nginx
+    resources:
+      requests:
+        memory: 15Gi  # 超过physics系的总预算10Gi
+```
+
+**结果：**
+```
+Error: exceeded quota: physics-budget, requested: requests.memory=15Gi,
+used: requests.memory=8Gi, limited: requests.memory=10Gi
+```
+*翻译：物理系预算不够了！你要15GB，但总预算只有10GB，已经用了8GB*
+
+## 查看和管理 📈
+
+```bash
+# 查看预算使用情况
+kubectl describe quota cs-budget -n computer-science
+
+# 查看所有院系配额
+kubectl get quota --all-namespaces
+
+# 实时监控资源使用
+kubectl top pods -n computer-science
+```
+
+## 最佳实践 💡
+
+- **生产环境**：设置严格预算防止资源滥用
+- **开发环境**：可以宽松一些便于调试和实验
+- **监控告警**：预算使用超过80%时告警
+- **定期审查**：根据实际使用情况调整配额
+- **分层管理**：不同重要级别的院系设置不同预算
+
+## 一句话总结 🎯
+
+**ResourceQuota就像大学的财务处，给每个院系设置明确的资源预算，防止某个院系把学校搞破产，确保资源公平分配！** 🏛️
+
+*记住：没有预算管理的大学会破产，没有ResourceQuota的K8s集群会崩溃！* 💰
+
+章节13:
+LimitRange：宿舍用电用水标准 🏠
+
+大家好！上一章我们学会了给院系设预算（ResourceQuota），今天来聊聊如何给每个宿舍制定用电用水标准。毕竟，有了院系总预算，还需要管好每个宿舍的具体使用情况。
+
+## 核心问题：如何防止个别学生把整栋楼搞停电？ 🔌
+
+想象一下这些场景：
+
+👉 某个CS系学生：在宿舍挖矿，功率拉满，整栋楼跳闸
+👉 物理系研究生：实验设备24小时运转，电费爆表
+👉 新入学学生：不知道标准配置，申请资源时一脸懵
+👉 宿舍管理员：每天处理各种资源纠纷，头疼不已
+
+这时候，需要LimitRange（宿舍用电用水标准）来规范管理！
+
+## LimitRange工作原理 🏠
+
+**就像宿舍管理规定**，给每个宿舍设置用电用水的标准和上限，防止某个学生把整栋楼电用光，同时给新学生设置标准配置。
+
+**为什么需要LimitRange？**
+- 防止个别宿舍过度消耗：某个学生不能把整栋楼电用光
+- 设置合理默认值：新学生入住时有标准配置
+- 强制最低标准：确保每个应用都有基本资源
+- 简化管理：统一的标准减少管理复杂度
+
+## 与ResourceQuota的关系 🔗
+
+**ResourceQuota** = 院系总预算（CS系总共100kW电力）
+**LimitRange** = 宿舍标准（每个宿舍最多3kW，默认1kW）
+
+两者配合使用：
+- ResourceQuota控制总量
+- LimitRange控制单体
+- 双重保险，确保资源合理分配
+
+## 宿舍标准配置实战 📋
+
+**计算机科学系的宿舍标准：**
+```yaml
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: cs-dorm-standards
+  namespace: computer-science
+spec:
+  limits:
+  # Pod级别的限制（整个宿舍）
+  - type: Pod
+    max:
+      cpu: "2"                   # 单个Pod最多2个CPU核心
+      memory: 4Gi                # 单个Pod最多4GB内存
+    min:
+      cpu: "100m"                # 单个Pod至少0.1个CPU核心
+      memory: 128Mi              # 单个Pod至少128MB内存
+
+  # Container级别的限制（单个学生）
+  - type: Container
+    default:                     # 默认配置（新学生标准）
+      cpu: "200m"                # 默认0.2个CPU核心
+      memory: 256Mi              # 默认256MB内存
+    defaultRequest:              # 默认请求（保底配置）
+      cpu: "100m"                # 保底0.1个CPU核心
+      memory: 128Mi              # 保底128MB内存
+    max:                         # 单个容器上限
+      cpu: "1"                   # 最多1个CPU核心
+      memory: 2Gi                # 最多2GB内存
+    min:                         # 单个容器下限
+      cpu: "50m"                 # 至少0.05个CPU核心
+      memory: 64Mi               # 至少64MB内存
+```
+
+**物理系的宿舍标准（更严格）：**
+```yaml
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: physics-dorm-standards
+  namespace: physics
+spec:
+  limits:
+  - type: Container
+    default:
+      cpu: "100m"                # 默认更少的CPU
+      memory: 128Mi              # 默认更少的内存
+    defaultRequest:
+      cpu: "50m"
+      memory: 64Mi
+    max:
+      cpu: "500m"                # 上限也更低
+      memory: 1Gi
+```
+
+## 实际效果演示 🎬
+
+**新学生入住时的自动配置：**
+```yaml
+# 新学生创建Pod时没有指定resources
+apiVersion: v1
+kind: Pod
+metadata:
+  name: new-student-pod
+  namespace: computer-science
+spec:
+  containers:
+  - name: app
+    image: nginx
+    # 没有指定resources，LimitRange会自动设置默认值
+```
+
+**K8s会自动添加：**
+```yaml
+resources:
+  requests:
+    cpu: "100m"      # 来自defaultRequest
+    memory: 128Mi
+  limits:
+    cpu: "200m"      # 来自default
+    memory: 256Mi
+```
+
+## 查看和管理 📈
+
+```bash
+# 查看宿舍标准
+kubectl describe limitrange cs-dorm-standards -n computer-science
+
+# 查看所有院系的宿舍标准
+kubectl get limitrange --all-namespaces
+
+# 检查Pod的实际资源配置
+kubectl describe pod new-student-pod -n computer-science
+```
+
+## 最佳实践 💡
+
+- **设置合理默认值**：新应用有标准配置，减少配置错误
+- **上限不要太严格**：给特殊需求留空间
+- **下限要保证基本运行**：避免资源不足导致故障
+- **配合ResourceQuota使用**：双重保险确保资源合理分配
+- **定期审查标准**：根据实际使用情况调整标准
+
+## 一句话总结 🎯
+
+**LimitRange就像宿舍管理规定，给每个宿舍设置用电用水标准，防止个别学生作妖，同时给新学生提供标准配置！** 🏠
+
+*记住：好的宿舍标准让大家住得安心，好的LimitRange让Pod跑得稳定！* ⚡
