@@ -852,17 +852,17 @@ ResourceQuota：院系预算管理办公室 🏛️
 
 这时候，需要ResourceQuota（院系预算管理办公室）来把关了！
 
-## ResourceQuota工作原理 💰
+ResourceQuota工作原理 💰
 
-**就像给每个院系设置年度预算**，超了就不能再申请资源，防止某个院系把所有资源都占了。
+就像给每个院系设置年度预算，超了就不能再申请资源，防止某个院系把所有资源都占了。
 
-**为什么需要ResourceQuota？**
+为什么需要ResourceQuota？
 - 防止资源垄断：某个院系不能把所有资源都占了
 - 成本控制：每个院系有明确的资源预算
 - 公平分配：确保各院系都能获得合理资源
 - 避免雪崩：防止某个院系的问题影响整个集群
 
-回顾：Pod的个人资源设置 🏠
+回顾：Pod的个人资源设置
 ```yaml
 apiVersion: v1
 kind: Pod
@@ -873,22 +873,21 @@ spec:
   - name: app
     image: nginx
     resources:
-      requests:          # 保底需求
+      requests:          # 保底需求 ⬇️
         memory: "128Mi"   # 至少要128MB内存
         cpu: "100m"       # 至少要0.1个CPU核心
-      limits:            # 最高上限
+      limits:            # 最高上限 ⬆️
         memory: "512Mi"   # 最多用512MB内存
         cpu: "500m"       # 最多用0.5个CPU核心
 ```
-
-- **requests** = 保证的基础用电量（1000W）
-- **limits** = 断路器设置（3000W，超了就跳闸）
+- requests = 保证的基础用电量（1000W）
+- limits = 断路器设置（3000W，超了就跳闸）
 
 ResourceQuota：院系预算管理办公室 🏛️
 
 给每个院系设置年度预算，超了就不能再申请资源，防止某个院系把所有资源都占了。
 
-**计算机科学系的预算设置：**
+计算机科学系的预算设置：
 ```yaml
 apiVersion: v1
 kind: ResourceQuota
@@ -914,7 +913,7 @@ spec:
     requests.storage: 100Gi      # 总共100GB存储
 ```
 
-**物理系的预算设置（预算较少）：**
+物理系的预算设置（预算较少）：
 ```yaml
 apiVersion: v1
 kind: ResourceQuota
@@ -933,7 +932,7 @@ spec:
 
 ## 实际效果演示 🎬
 
-**创建超预算的Pod会怎样？**
+创建超预算的Pod会怎样？
 ```yaml
 # 尝试在physics系创建大内存Pod
 apiVersion: v1
@@ -950,21 +949,20 @@ spec:
         memory: 15Gi  # 超过physics系的总预算10Gi
 ```
 
-**结果：**
+结果：
 ```
 Error: exceeded quota: physics-budget, requested: requests.memory=15Gi,
 used: requests.memory=8Gi, limited: requests.memory=10Gi
 ```
 *翻译：物理系预算不够了！你要15GB，但总预算只有10GB，已经用了8GB*
 
-## 查看和管理 📈
-
+## 查看和管理
 ```bash
-# 查看预算使用情况
-kubectl describe quota cs-budget -n computer-science
-
 # 查看所有院系配额
 kubectl get quota --all-namespaces
+
+# 查看预算使用情况
+kubectl describe quota cs-budget -n computer-science
 
 # 实时监控资源使用
 kubectl top pods -n computer-science
@@ -972,15 +970,15 @@ kubectl top pods -n computer-science
 
 ## 最佳实践 💡
 
-- **生产环境**：设置严格预算防止资源滥用
-- **开发环境**：可以宽松一些便于调试和实验
-- **监控告警**：预算使用超过80%时告警
-- **定期审查**：根据实际使用情况调整配额
-- **分层管理**：不同重要级别的院系设置不同预算
+- 生产环境：设置严格预算防止资源滥用
+- 开发环境：可以宽松一些便于调试和实验
+- 监控告警：预算使用超过80%时告警
+- 定期审查：根据实际使用情况调整配额
+- 分层管理：不同重要级别的院系设置不同预算
 
 ## 一句话总结 🎯
 
-**ResourceQuota就像大学的财务处，给每个院系设置明确的资源预算，防止某个院系把学校搞破产，确保资源公平分配！** 🏛️
+ResourceQuota就像大学的财务处，给每个院系设置明确的资源预算，防止某个院系把学校搞破产，确保资源公平分配！ 🏛️
 
 *记住：没有预算管理的大学会破产，没有ResourceQuota的K8s集群会崩溃！* 💰
 
@@ -1002,9 +1000,9 @@ LimitRange：宿舍用电用水标准 🏠
 
 ## LimitRange工作原理 🏠
 
-**就像宿舍管理规定**，给每个宿舍设置用电用水的标准和上限，防止某个学生把整栋楼电用光，同时给新学生设置标准配置。
+就像宿舍管理规定，给每个宿舍设置用电用水的标准和上限，防止某个学生把整栋楼电用光，同时给新学生设置标准配置。
 
-**为什么需要LimitRange？**
+为什么需要LimitRange？
 - 防止个别宿舍过度消耗：某个学生不能把整栋楼电用光
 - 设置合理默认值：新学生入住时有标准配置
 - 强制最低标准：确保每个应用都有基本资源
@@ -1012,8 +1010,8 @@ LimitRange：宿舍用电用水标准 🏠
 
 ## 与ResourceQuota的关系 🔗
 
-**ResourceQuota** = 院系总预算（CS系总共100kW电力）
-**LimitRange** = 宿舍标准（每个宿舍最多3kW，默认1kW）
+ResourceQuota = 院系总预算（CS系总共100kW电力）
+LimitRange = 宿舍标准（每个宿舍最多3kW，默认1kW）
 
 两者配合使用：
 - ResourceQuota控制总量
@@ -1022,7 +1020,7 @@ LimitRange：宿舍用电用水标准 🏠
 
 ## 宿舍标准配置实战 📋
 
-**计算机科学系的宿舍标准：**
+计算机科学系的宿舍标准：
 ```yaml
 apiVersion: v1
 kind: LimitRange
@@ -1056,7 +1054,7 @@ spec:
       memory: 64Mi               # 至少64MB内存
 ```
 
-**物理系的宿舍标准（更严格）：**
+物理系的宿舍标准（更严格）：
 ```yaml
 apiVersion: v1
 kind: LimitRange
@@ -1079,7 +1077,7 @@ spec:
 
 ## 实际效果演示 🎬
 
-**新学生入住时的自动配置：**
+新学生入住时的自动配置：
 ```yaml
 # 新学生创建Pod时没有指定resources
 apiVersion: v1
@@ -1094,7 +1092,7 @@ spec:
     # 没有指定resources，LimitRange会自动设置默认值
 ```
 
-**K8s会自动添加：**
+K8s会自动添加：
 ```yaml
 resources:
   requests:
@@ -1120,14 +1118,14 @@ kubectl describe pod new-student-pod -n computer-science
 
 ## 最佳实践 💡
 
-- **设置合理默认值**：新应用有标准配置，减少配置错误
-- **上限不要太严格**：给特殊需求留空间
-- **下限要保证基本运行**：避免资源不足导致故障
-- **配合ResourceQuota使用**：双重保险确保资源合理分配
-- **定期审查标准**：根据实际使用情况调整标准
+- 设置合理默认值：新应用有标准配置，减少配置错误
+- 上限不要太严格：给特殊需求留空间
+- 下限要保证基本运行：避免资源不足导致故障
+- 配合ResourceQuota使用：双重保险确保资源合理分配
+- 定期审查标准：根据实际使用情况调整标准
 
 ## 一句话总结 🎯
 
-**LimitRange就像宿舍管理规定，给每个宿舍设置用电用水标准，防止个别学生作妖，同时给新学生提供标准配置！** 🏠
+LimitRange就像宿舍管理规定，给每个宿舍设置用电用水标准，防止个别学生作妖，同时给新学生提供标准配置！ 🏠
 
 *记住：好的宿舍标准让大家住得安心，好的LimitRange让Pod跑得稳定！* ⚡
