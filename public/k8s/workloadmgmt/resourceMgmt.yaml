@@ -1,0 +1,103 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-luxury-edition
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: nginx-luxury
+  template:
+    metadata:
+      labels:
+        app: nginx-luxury
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:latest
+        # 🔐 从保险箱里拿密码
+        env:
+        - name: ADMIN_USER
+          valueFrom:
+            secretKeyRef:
+              name: nginx-secrets
+              key: admin-user
+        - name: ADMIN_PASS
+          valueFrom:
+            secretKeyRef:
+              name: nginx-secrets
+              key: admin-pass
+        # ⚡ 安装限电器
+        resources:
+          requests:
+            memory: "64Mi"    # 基础内存：64MB
+            cpu: "50m"        # 基础CPU：0.05核心
+          limits:
+            memory: "128Mi"   # 最大内存：128MB
+            cpu: "100m"       # 最大CPU：0.1核心
+        ports:
+        - containerPort: 80
+        volumeMounts:
+        - name: nginx-config-volume
+          mountPath: /etc/nginx/conf.d
+        - name: nginx-data-volume
+          mountPath: /usr/share/nginx/html
+        - name: nginx-logs-volume
+          mountPath: /var/log/nginx
+        ports:
+        - containerPort: 80
+      volumes:
+      # 公告板挂载
+      - name: nginx-config-volume
+        configMap:
+          name: nginx-config
+      # 日志储物柜
+      - name: nginx-logs-volume
+        emptyDir: {}
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-config
+data:
+  default.conf: |
+    server {
+        listen 80;
+        server_name localhost;
+        
+        # Document root
+        root /usr/share/nginx/html;
+        index index.html index.htm;
+        
+        # Main location block
+        location / {
+            try_files $uri $uri/ =404;
+        }
+        
+        # Health check endpoint
+        location /health {
+            access_log off;
+            return 200 "healthy\n";
+            add_header Content-Type text/plain;
+        }
+        
+        # Static assets with caching
+        location ~* \.(css|js|png|jpg|jpeg|gif|ico|svg)$ {
+            expires 1y;
+            add_header Cache-Control "public, immutable";
+        }
+        
+        # Security headers
+        add_header X-Frame-Options "SAMEORIGIN" always;
+        add_header X-Content-Type-Options "nosniff" always;
+        add_header X-XSS-Protection "1; mode=block" always;
+        
+        # Error pages
+        error_page 404 /404.html;
+        error_page 500 502 503 504 /50x.html;
+        
+        # Access and error logs
+        access_log /var/log/nginx/access.log;
+        error_log /var/log/nginx/error.log;
+    }
