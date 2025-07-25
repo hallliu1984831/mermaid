@@ -985,38 +985,42 @@ ResourceQuota就像大学的财务处，给每个院系设置明确的资源预�
 章节13:
 LimitRange：宿舍用电用水标准 🏠
 
-大家好！上一章我们学会了给院系设预算（ResourceQuota），今天来聊聊如何给每个宿舍制定用电用水标准。毕竟，有了院系总预算，还需要管好每个宿舍的具体使用情况。
+大家好！上一章我介绍了给院系设置预算（ResourceQuota），今天来聊聊如何给每个宿舍制定用电用水标准。有了院系总预算这个大盘，还需要管好每个宿舍的具体使用情况，这样才能对 K8S 集群进行更精细的管理，一句话，省💰！尤其是你在用云端资源的场合😂
 
-## 核心问题：如何防止个别学生把整栋楼搞停电？ 🔌
-
+1️⃣ LimitRange：就像宿舍管理规定，给每个宿舍设置用电用水的标准和上限，防止某个学生把整栋楼电用光，同时给新学生设置标准配置。
 想象一下这些场景：
-
-👉 某个CS系学生：在宿舍挖矿，功率拉满，整栋楼跳闸
+👉 计算机系学生：在宿舍挖矿，功率拉满，整栋楼跳闸
 👉 物理系研究生：实验设备24小时运转，电费爆表
 👉 新入学学生：不知道标准配置，申请资源时一脸懵
 👉 宿舍管理员：每天处理各种资源纠纷，头疼不已
-
 这时候，需要LimitRange（宿舍用电用水标准）来规范管理！
 
-## LimitRange工作原理 🏠
+2️⃣ 为什么需要LimitRange？
+👉 防止个别宿舍过度消耗：某个学生不能把整栋楼电用光
+👉 设置合理默认值：新学生入住时有标准配置
+👉 强制最低标准：确保每个应用都有基本资源
+👉 简化管理：统一的标准减少管理复杂度
 
-就像宿舍管理规定，给每个宿舍设置用电用水的标准和上限，防止某个学生把整栋楼电用光，同时给新学生设置标准配置。
-
-为什么需要LimitRange？
-- 防止个别宿舍过度消耗：某个学生不能把整栋楼电用光
-- 设置合理默认值：新学生入住时有标准配置
-- 强制最低标准：确保每个应用都有基本资源
-- 简化管理：统一的标准减少管理复杂度
-
-## 与ResourceQuota的关系 🔗
-
-ResourceQuota = 院系总预算（CS系总共100kW电力）
+3️⃣ 与ResourceQuota的关系 🔗
+ResourceQuota = 院系总预算（计算机系总共100kW电力配额）
 LimitRange = 宿舍标准（每个宿舍最多3kW，默认1kW）
 
 两者配合使用：
-- ResourceQuota控制总量
-- LimitRange控制单体
-- 双重保险，确保资源合理分配
+👉 ResourceQuota控制总量
+👉 LimitRange控制单体
+👉 双重保险，确保资源合理分配
+
+4️⃣ LimitRange的创建、使用以及维护等场景，请查看图2，3，4
+
+5️⃣ 使用建议
+👉 设置合理默认值：新应用有标准配置，减少配置错误
+👉 上限不要太严格：给特殊需求留空间
+👉 下限要保证基本运行：避免资源不足导致故障
+👉 配合ResourceQuota使用：双重保险确保资源合理分配
+👉 定期审查标准：根据实际使用情况调整标准
+
+良好管理的宿舍标准让大家住得安心，好的 LimitRange 让 Pod 跑得稳定！
+
 
 ## 宿舍标准配置实战 📋
 
@@ -1103,8 +1107,7 @@ resources:
     memory: 256Mi
 ```
 
-## 查看和管理 📈
-
+## 查看和管理
 ```bash
 # 查看宿舍标准
 kubectl describe limitrange cs-dorm-standards -n computer-science
@@ -1116,16 +1119,184 @@ kubectl get limitrange --all-namespaces
 kubectl describe pod new-student-pod -n computer-science
 ```
 
-## 最佳实践 💡
-
-- 设置合理默认值：新应用有标准配置，减少配置错误
-- 上限不要太严格：给特殊需求留空间
-- 下限要保证基本运行：避免资源不足导致故障
-- 配合ResourceQuota使用：双重保险确保资源合理分配
-- 定期审查标准：根据实际使用情况调整标准
-
 ## 一句话总结 🎯
 
-LimitRange就像宿舍管理规定，给每个宿舍设置用电用水标准，防止个别学生作妖，同时给新学生提供标准配置！ 🏠
+**LimitRange就像宿舍管理规定，给每个宿舍设置用电用水标准，防止个别学生作妖，同时给新学生提供标准配置！** 🏠
 
 *记住：好的宿舍标准让大家住得安心，好的LimitRange让Pod跑得稳定！* ⚡
+
+章节14:
+PV & PVC：大学的储物柜管理系统 📦
+大家好！前面聊完了院系预算和宿舍标准，今天来聊校园的储物管理！大学有储物管理系统，K8S也有存储管理体系，毕竟 Pod 这个共享宿舍如果总是重启的话，数据丢失就说不过去了😂
+
+1️⃣ 数据放哪里才不会丢？ 🤔
+👉 网站用户上传的图片，Pod重启后全没了 😭
+👉 数据库存储的订单信息，容器挂了就消失了 😱
+👉 应用生成的日志文件，重新部署就找不到了 😂
+这时候，需要PV（储物柜）和PVC（储物申请）来拯救数据，对数据做持久化处理！
+
+2️⃣ K8S 存储的优势：
+👉 数据和应用分离：应用挂了，数据还在
+👉 自动管理：K8s帮你处理绑定和挂载
+👉 灵活调度：数据可以跟着Pod走
+
+3️⃣ PV (PersistentVolume)：大学的储物柜系统 🗄️
+如图2，PV 就像大学提供的储物柜，独立于学生存在，学生毕业了储物柜还在。
+👉 独立存在
+👉 集群共享
+👉 有生命周期
+👉 类型丰富
+
+4️⃣ PVC (PersistentVolume Claim)：储物柜申请单 📝
+如图3，就像学生填写储物柜申请表，告诉管理员需要什么样的储物柜。
+👉 需求描述
+👉 自动匹配
+👉 抽象层：Pod不需要知道具体是本地硬盘还是网络存储，只管用就行
+
+5️⃣ PV与PVC的相亲匹配 🔗
+提交申请 → 自动匹配 → 绑定成功 → Pod使用，如图4
+
+6️⃣ 存储访问模式
+如图5，存储访问一共有三种模式，根据使用场景进行合理选择 🔑，举几个 🌰 如下：
+👉 数据库用RWO，确保数据一致性
+👉 静态文件用ROX，多Pod共享读取
+👉 日志收集用RWX，多Pod写入
+👉 定期备份重要数据，设置合理回收策略，毕竟PV、PVC也会被意外删除
+
+7️⃣ 存储回收策略
+👉 Retain：手动回收，数据保留
+👉 Delete：自动删除，数据清空
+👉 Recycle：清理重用（由于安全性和兼容性问题，已废弃）
+
+对于SRE来说，存储管理是保障业务连续性的关键环节。没有持久化存储，应用重启后数据就丢失了，这在生产环境是不可接受的。K8S 提供的 PV 储物柜和 PVC 申请单的完整体系，让数据和应用分离，确保Pod重启后数据依然安全！
+
+**本地储物柜（HostPath PV）：**
+```yaml
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: local-storage-pv
+spec:
+  capacity:
+    storage: 10Gi                    # 储物柜容量：10GB
+  accessModes:
+  - ReadWriteOnce                    # 单人专用
+  persistentVolumeReclaimPolicy: Retain  # 手动回收
+  storageClassName: local-storage    # 本地存储类型
+  hostPath:
+    path: /data/storage              # 节点本地路径
+    type: DirectoryOrCreate          # 目录不存在就创建
+```
+
+**网络共享储物柜（NFS PV）：**
+```yaml
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: nfs-storage-pv
+spec:
+  capacity:
+    storage: 50Gi                    # 共享储物柜：50GB
+  accessModes:
+  - ReadWriteMany                    # 多人共享
+  persistentVolumeReclaimPolicy: Recycle  # 自动清理重用
+  storageClassName: nfs-storage      # NFS存储类型
+  nfs:
+    server: 192.168.1.100           # NFS服务器地址
+    path: /shared/storage           # 共享目录路径
+```
+
+**个人储物柜申请：**
+```yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: my-personal-storage
+  namespace: computer-science
+spec:
+  accessModes:
+  - ReadWriteOnce                    # 个人专用
+  storageClassName: local-storage    # 匹配本地存储PV
+  resources:
+    requests:
+      storage: 5Gi                   # 申请5GB空间
+```
+
+**共享储物柜申请：**
+```yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: team-shared-storage
+  namespace: computer-science
+spec:
+  accessModes:
+  - ReadWriteMany                    # 团队共享
+  storageClassName: nfs-storage      # 匹配NFS存储PV
+  resources:
+    requests:
+      storage: 20Gi                  # 申请20GB共享空间
+```
+
+
+**匹配条件：** 容量匹配、访问模式匹配、存储类型匹配
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: my-app-pod
+spec:
+  containers:
+  - name: app
+    image: nginx
+    volumeMounts:
+    - name: data-volume
+      mountPath: /usr/share/nginx/html  # 挂载到容器内
+  volumes:
+  - name: data-volume
+    persistentVolumeClaim:
+      claimName: my-personal-storage    # 使用申请的储物柜
+```
+
+**RWO示例（个人储物柜）：**
+```yaml
+# 数据库Pod专用存储
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mysql-storage
+spec:
+  accessModes:
+  - ReadWriteOnce      # 只有一个Pod能写入
+  resources:
+    requests:
+      storage: 10Gi
+```
+
+**RWX示例（共享储物柜）：**
+```yaml
+# 多个Pod共享的日志存储
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: shared-logs
+spec:
+  accessModes:
+  - ReadWriteMany      # 多个Pod都能写入
+  resources:
+    requests:
+      storage: 50Gi
+```
+
+## 实际操作 🔧
+
+```bash
+# 查看储物柜状态
+kubectl get pv
+
+# 查看储物申请
+kubectl get pvc -n computer-science
+
+# 查看绑定详情
+kubectl describe pvc my-personal-storage -n computer-science
+```
