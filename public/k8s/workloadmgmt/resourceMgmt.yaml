@@ -1,21 +1,20 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: nginx-luxury-edition
+  name: nginx-edition
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: nginx-luxury
+      app: nginx
   template:
     metadata:
       labels:
-        app: nginx-luxury
+        app: nginx
     spec:
       containers:
       - name: nginx
         image: nginx:latest
-        # 🔐 从保险箱里拿密码
         env:
         - name: ADMIN_USER
           valueFrom:
@@ -27,31 +26,26 @@ spec:
             secretKeyRef:
               name: nginx-secrets
               key: admin-pass
-        # ⚡ 安装限电器
         resources:
           requests:
-            memory: "64Mi"    # 基础内存：64MB
-            cpu: "50m"        # 基础CPU：0.05核心
+            memory: "64Mi"    
+            cpu: "50m"        
           limits:
-            memory: "128Mi"   # 最大内存：128MB
-            cpu: "100m"       # 最大CPU：0.1核心
+            memory: "128Mi"   
+            cpu: "100m"       
         ports:
         - containerPort: 80
         volumeMounts:
         - name: nginx-config-volume
           mountPath: /etc/nginx/conf.d
-        - name: nginx-data-volume
-          mountPath: /usr/share/nginx/html
         - name: nginx-logs-volume
           mountPath: /var/log/nginx
         ports:
         - containerPort: 80
       volumes:
-      # 公告板挂载
       - name: nginx-config-volume
         configMap:
           name: nginx-config
-      # 日志储物柜
       - name: nginx-logs-volume
         emptyDir: {}
 
@@ -101,3 +95,8 @@ data:
         access_log /var/log/nginx/access.log;
         error_log /var/log/nginx/error.log;
     }
+
+---
+kubectl create secret generic nginx-secrets \
+  --from-literal=admin-user=admin \
+  --from-literal=admin-pass=adminPwd -n cs
