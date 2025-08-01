@@ -1300,3 +1300,112 @@ kubectl get pvc -n computer-science
 # 查看绑定详情
 kubectl describe pvc my-personal-storage -n computer-science
 ```
+
+章节15:
+StorageClass：大学的智能储物管理员 🤖
+
+大家好！上一章聊了 PV(PersistentVolume) 储物柜和 PVC(PersistentVolumeClaim) 申请单，细心的小红薯可能注意到了，每次需要使用存储时，都要手动创建 PV ，这看着很麻烦，其实一点都不方便。今天来聊一个创建 PV 更好的选项： Kubernetes StorageClass(SC)，大学里的"智能储物管理员"。
+
+1️⃣ 为什么需要SC：因为手动管理太累了🥱
+👉 学生申请储物柜，管理员要手动去买、装、配置
+👉 学生多了，管理员忙不过来
+StorageClass解决方案：学生提交申请，系统自动采购、安装、配置！
+
+2️⃣ 工作原理：动态供应流程：
+PVC申请 → StorageClass响应 → 调用Provisioner → 自动创建PV → 自动绑定
+
+3️⃣ 三种智能管理员：
+👉 本地存储管理员：使用本地存储创建，依赖于集群的各个节点的磁盘存储。
+👉 云存储管理员：使用云端存储，虽然选项很多：aws云，阿里云，腾讯云。。这带个云的存储啥都好，就是对钱包不好😂
+👉 网络存储管理员：使用公司/部门的网络存储：Network File System，免费的才是真香👍
+三种存储请参考图2、3和4，主要参数说明如下：
+Provisioner（供应商）：决定用哪家"厂商"制造储物柜
+VolumeBindingMode（绑定模式）：Immediate：立即分配储物柜；WaitForFirstConsumer：等学生来了再分配
+ReclaimPolicy（回收策略）：Delete：用完自动回收；Retain：保留数据，手动清理
+AllowVolumeExpansion（扩容支持）：储物柜是否可以扩大
+
+4️⃣ 使用示例，请参考图5，在创建 PVC 时指定 SC
+
+5️⃣ SC 使用建议：
+👉 为不同业务场景创建不同StorageClass
+👉 生产环境用高性能存储，开发环境用标准存储
+👉 定期清理不用的动态PV，避免成本浪费
+👉 敏感数据使用加密存储
+
+StorageClass就像大学里的智能储物管理员，学生只需要提交申请，它就能自动采购、安装、配置储物柜，让存储管理从手工作坊升级为智能工厂！在 K8S 的世界，有了StorageClass，SRE再也不用半夜起来手动创建 PV 了，就它了！
+
+
+## 三种智能管理员 🎯
+
+**本地存储管理员：**
+```yaml
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: local-fast-storage
+provisioner: kubernetes.io/no-provisioner  # 不自动创建，需要手动准备PV
+volumeBindingMode: WaitForFirstConsumer    # 等学生来了再分配
+allowVolumeExpansion: false                # 不支持扩容
+reclaimPolicy: Delete                      # 用完就删除
+```
+
+**云存储管理员：**
+```yaml
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: aws-gp3-storage
+provisioner: ebs.csi.aws.com              # AWS EBS供应商
+parameters:
+  type: gp3                                # SSD类型
+  fsType: ext4                             # 文件系统
+  encrypted: "true"                        # 加密存储
+allowVolumeExpansion: true                 # 支持扩容
+reclaimPolicy: Delete                      # 自动清理
+volumeBindingMode: Immediate               # 立即分配
+```
+
+**网络存储管理员：**
+```yaml
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: nfs-shared-storage
+provisioner: nfs.csi.k8s.io               # NFS供应商
+parameters:
+  server: nfs-server.example.com          # Network File System服务器
+  path: /shared/storage                    # 共享路径
+  mountOptions: "vers=4.1,rsize=1048576"  # 挂载选项
+allowVolumeExpansion: true                 # 支持扩容
+reclaimPolicy: Retain                      # 保留数据
+volumeBindingMode: Immediate               # 立即分配
+```
+
+
+## 使用示例
+```yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: my-dynamic-storage
+  namespace: computer-science
+spec:
+  accessModes:
+  - ReadWriteOnce
+  storageClassName: aws-gp3-storage        # 指定智能管理员
+  resources:
+    requests:
+      storage: 10Gi                        # 申请10GB
+```
+
+
+## 常用命令 📋
+
+```bash
+# 查看所有StorageClass
+kubectl get storageclass
+
+# 设置默认StorageClass
+kubectl patch storageclass aws-gp3-storage -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
+```
+

@@ -200,3 +200,51 @@ NOC：SRE界的"夜猫子保安"🦉
 5️⃣ NOC 的典型工作流程
 告警接收 → 初步分析 → 分类处理 → 升级/解决 → 记录归档
 说到这，大家应该都能明白SRE的告警是从哪里来的了！除了自己定时巡检外，NOC就是另一个重要的"情报来源"。
+
+章节5:
+探索SRE产线事故:存储引发的“删库跑路”
+
+大家好！前面聊了NOC和事故复盘，今天作为一名SRE，来分享一个让我至今想起来还"心有余悸"的真实故障：StorageClass默认回收策略导致的数据丢失事件。这个故障让我深刻体会到了什么叫"默认配置是魔鬼"。
+
+1️⃣ 故障背景：看似无害的"清理"操作
+一个正常的工作日下午，我在清理K8s集群中一些不用的资源。看到一个已经不使用的PVC，于是打算将其删除。快速复制PVC名字，删除命令一气呵成，回车走起⚡️
+
+2️⃣ 故障爆发：SRE的"连环杀"
+删除命令执行成功，接着检查所有PVC的状态，发现被删除的pvc一直处于 Terminating 的状态，更要命的是删除命令里的pvc居然复制错了，复制成了被删除对象的上一个：grafana正在使用的PVC 😭
+
+3️⃣ 发现问题：SRE的"心脏骤停"时刻
+看到误删的PVC状态是中止的内心独白：
+👉 出事了！ 敲完命令咋不检查下？！咋恢复呢？？？
+
+4️⃣ 经过最初的慌乱，我很快冷静下来，接着思考对策，很快梳理出了如下信息：
+👉 PVC处于中止状态，因为Grafana Pod还在使用它
+👉 如果grafana的pod重启，那么这个PVC就会被真正删除，由于它是使用StorageClass创建的，并且SC的回收策略是Delete，PVC被删除以后连带PV也会被删除，也就是说grafana的数据就没有了。
+👉 grafana再次启动会失败，原因是依赖的PVC不存在了
+此时的Grafana各项指标正常，但这只是"回光返照"，不靠谱啊☠️
+
+5️⃣ 紧急救援：自己从坑里爬出来
+👉 通知团队，说明误操作，并汇报接下来的恢复步骤（包括grafana重启），这下KPI要难看了😭
+👉 趁PVC还能用，赶紧备份数据，这是救命稻草！
+👉 重启grafana pod，新pod 变为pending状态，提示依赖的pvc不存在
+👉 创建新 PVC，和之前误删的同名
+👉 新pod 顺利启动，然后倒入备份的grafana数据
+👉 检查grafana的各项指标，确保恢复
+
+6️⃣ 总结教训
+👉 清理对象要仔细检查，执行命令前一定要二次确认
+👉 SC默认Delete策略是隐形杀手，需要修改为Retain模式
+👉 备份是SRE的生命线，永远不要相信"不会出问题"！
+
+
+```bash
+备份命令
+kubectl exec -it grafana-pod -- tar -czf /tmp/grafana-backup.tar.gz /var/lib/grafana
+kubectl cp grafana-pod:/tmp/grafana-backup.tar.gz ./grafana-backup.tar.gz
+
+恢复命令
+kubectl cp ./grafana-backup.tar.gz grafana-pod:/tmp/grafana-backup.tar.gz
+kubectl exec -it grafana-pod -- tar -xzf /tmp/grafana-backup.tar.gz -C /var/lib/grafana
+```
+
+
+
