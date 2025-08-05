@@ -1409,3 +1409,227 @@ kubectl get storageclass
 kubectl patch storageclass aws-gp3-storage -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
 ```
 
+章节16:
+大家好！前面我们聊了共享宿舍（Pod）、楼管大妈（ReplicaSet）、总宿舍管理员（Deployment）、外卖调度中心（Service），今天来说说整个宿舍管理体系的核心——学校总务处（API Server）。
+
+API Server：学校总务处——万事都要找我
+想象一下，如果你是学生，想要申请宿舍、查询宿舍信息、投诉宿舍问题，你会去找谁？没错，就是学校总务处！在 Kubernetes 的世界里，API Server 就是这个"总务处"，它是整个集群的统一服务窗口。
+
+统一受理窗口：
+无论你是想创建新的共享宿舍（Pod），还是想调整宿舍数量（修改 Deployment），或者查看宿舍分配情况（查询资源状态），都必须通过总务处。就像现实中的总务处一样，它是唯一的官方渠道：
+- 想申请宿舍？填表交给总务处
+- 想退宿？找总务处办手续
+- 想投诉楼管？还是找总务处
+- 想查看宿舍费用？依然是总务处
+
+身份验证和权限管理：
+总务处可不是谁来都给办事的。首先，你得出示学生证（身份认证），证明你是这个学校的人。然后，总务处还要检查你的权限：
+- 普通学生只能申请普通宿舍
+- 研究生可以申请研究生公寓
+- 教职工才能申请教师宿舍
+- 校长想住哪就住哪（管理员权限）
+
+如果你是个校外人员，想混进来申请宿舍？门都没有！总务处的大妈眼睛可亮着呢，假学生证一眼就能看出来。
+
+统一调度协调：
+总务处接到你的申请后，可不是自己动手安排宿舍，而是协调各个相关部门：
+- 通知楼管大妈（ReplicaSet）："小王要住宿，给他安排个床位"
+- 联系外卖调度中心（Service）："新宿舍的外卖地址记得更新"
+- 协调后勤部门（Scheduler）："看看哪栋楼还有空房间"
+- 通知财务处："记得收宿舍费"
+
+就像一个指挥中心，总务处把你的需求传达给各个执行部门，确保每个环节都不出错。
+
+档案管理和信息存储：
+总务处最重要的职责之一就是记录存档。所有的宿舍分配信息都存在总务处的档案室（etcd）里：
+- 张三住在3号楼201室，2023年9月1日入住
+- 李四的宿舍申请在审批中
+- 王五因为违纪被取消宿舍资格
+
+这些信息必须准确无误，因为其他部门都要依赖这些数据工作。楼管大妈要知道哪个房间住了谁，外卖调度中心要知道哪些房间在营业，后勤部门要知道哪些房间需要维修。
+
+实时监控和状态管理：
+总务处还有一个重要功能——实时掌握全校宿舍的使用情况。通过各种监控系统，总务处随时知道：
+- 哪个宿舍空了（Pod 挂了）
+- 哪个宿舍满员了（资源使用情况）
+- 哪个宿舍需要维修（节点故障）
+- 哪栋楼的入住率最高（负载均衡）
+
+一旦发现问题，总务处会立即协调相关部门处理。比如发现某个宿舍断电了，总务处会马上通知维修工人，同时安排楼管大妈临时调配其他房间。
+
+RESTful API：标准化服务流程
+为了提高效率，总务处还制定了标准化的服务流程（RESTful API）：
+- GET：查询信息（"我想查看我的宿舍信息"）
+- POST：创建资源（"我要申请新宿舍"）
+- PUT：更新信息（"我要更换宿舍"）
+- DELETE：删除资源（"我要退宿"）
+
+这样，无论是学生、老师还是其他部门，都按照统一的流程办事，避免了混乱和错误。
+
+高可用性：总务处不能停
+想象一下，如果总务处突然关门了会怎样？整个宿舍管理系统都会瘫痪！学生申请不了宿舍，楼管不知道该安排谁住哪，外卖送不到正确地址...
+
+所以，API Server 通常会部署多个副本，就像总务处会安排多个值班人员一样。即使某个工作人员请假了，其他人也能顶上，确保服务不中断。
+
+总结：
+API Server 作为 Kubernetes 的"总务处"，是整个集群管理的核心枢纽。它不仅是统一的服务入口，还负责身份验证、权限管理、资源协调、信息存储和实时监控。就像现实中的总务处一样，虽然它不直接管理具体的宿舍，但没有它，整个宿舍管理体系就无法正常运转。
+
+下次当你使用 kubectl 命令时，记住你其实是在和这个"总务处"打交道，它会帮你把需求传达给集群中的各个组件，让你的应用能够顺利运行在这个"宿舍大楼"里！
+
+## 实战演示：如何与总务处（API Server）打交道 💻
+
+虽然我们不能"创建"总务处，但可以通过各种方式与它交互：
+
+### 1️⃣ 基础的总务处业务办理（kubectl 命令）
+```bash
+# 查看总务处的基本信息
+kubectl cluster-info
+
+# 查看总务处支持哪些业务（API 版本）
+kubectl api-versions
+
+# 查看总务处能管理哪些资源类型
+kubectl api-resources
+
+# 向总务处申请创建宿舍
+kubectl apply -f nginx-pod.yaml
+
+# 向总务处查询宿舍状态
+kubectl get pods
+
+# 向总务处查询详细的宿舍信息
+kubectl describe pod nginx-pod
+
+# 向总务处申请删除宿舍
+kubectl delete pod nginx-pod
+```
+
+### 2️⃣ 直接与总务处对话（REST API 调用）
+```bash
+# 获取总务处的地址
+APISERVER=$(kubectl config view --minify -o jsonpath='{.clusters[0].cluster.server}')
+
+# 获取访问令牌（学生证）
+TOKEN=$(kubectl get secret $(kubectl get serviceaccount default -o jsonpath='{.secrets[0].name}') -o jsonpath='{.data.token}' | base64 --decode)
+
+# 直接向总务处查询所有宿舍信息
+curl -X GET $APISERVER/api/v1/pods \
+  --header "Authorization: Bearer $TOKEN" \
+  --insecure
+
+# 向总务处提交宿舍申请
+curl -X POST $APISERVER/api/v1/namespaces/default/pods \
+  --header "Authorization: Bearer $TOKEN" \
+  --header "Content-Type: application/json" \
+  --data '{
+    "apiVersion": "v1",
+    "kind": "Pod",
+    "metadata": {"name": "api-test-pod"},
+    "spec": {
+      "containers": [{
+        "name": "nginx",
+        "image": "nginx:latest"
+      }]
+    }
+  }' \
+  --insecure
+```
+
+### 3️⃣ 编程方式与总务处交互（Python 客户端）
+```python
+from kubernetes import client, config
+
+# 加载配置（相当于出示学生证）
+config.load_kube_config()
+
+# 创建API客户端（连接总务处）
+v1 = client.CoreV1Api()
+
+# 向总务处查询所有宿舍
+print("向总务处查询宿舍列表:")
+pods = v1.list_pod_for_all_namespaces()
+for pod in pods.items:
+    print(f"宿舍: {pod.metadata.name}, 状态: {pod.status.phase}")
+
+# 向总务处申请新宿舍
+pod_manifest = {
+    "apiVersion": "v1",
+    "kind": "Pod",
+    "metadata": {"name": "python-test-pod"},
+    "spec": {
+        "containers": [{
+            "name": "busybox",
+            "image": "busybox",
+            "command": ["sleep", "3600"]
+        }]
+    }
+}
+
+print("向总务处申请新宿舍...")
+v1.create_namespaced_pod(namespace="default", body=pod_manifest)
+print("宿舍申请已提交！")
+```
+
+### 4️⃣ 监控总务处的工作状态
+```bash
+# 查看总务处的健康状态
+kubectl get componentstatuses
+
+# 查看总务处的详细信息
+kubectl get endpoints kubernetes
+
+# 查看总务处的访问日志（如果有权限）
+kubectl logs -n kube-system kube-apiserver-<node-name>
+
+# 查看总务处处理的事件
+kubectl get events --sort-by=.metadata.creationTimestamp
+```
+
+### 5️⃣ 总务处的权限验证演示
+```bash
+# 创建一个受限用户（普通学生）
+kubectl create serviceaccount student-user
+
+# 给学生分配有限权限（只能查看，不能创建）
+kubectl create clusterrolebinding student-binding \
+  --clusterrole=view \
+  --serviceaccount=default:student-user
+
+# 使用学生身份访问总务处
+kubectl --as=system:serviceaccount:default:student-user get pods
+# ✅ 可以查看宿舍
+
+kubectl --as=system:serviceaccount:default:student-user delete pod nginx-pod
+# ❌ 没有权限删除宿舍
+```
+
+### 6️⃣ 总务处的负载均衡演示
+```yaml
+# 如果你有多个API Server（多个总务处窗口）
+apiVersion: v1
+kind: Endpoints
+metadata:
+  name: kubernetes
+subsets:
+- addresses:
+  - ip: 192.168.1.100  # 总务处窗口1
+  - ip: 192.168.1.101  # 总务处窗口2
+  - ip: 192.168.1.102  # 总务处窗口3
+  ports:
+  - port: 6443
+    protocol: TCP
+```
+
+## 总务处的幕后工作流程 🔄
+
+当你执行 `kubectl apply -f pod.yaml` 时，总务处的工作流程：
+
+1. **接收请求**：总务处收到你的宿舍申请
+2. **身份验证**：检查你的学生证是否有效
+3. **权限检查**：确认你有申请这类宿舍的权限
+4. **数据验证**：检查申请表是否填写正确
+5. **存储记录**：将申请信息存入档案室（etcd）
+6. **通知相关部门**：告诉调度器（Scheduler）安排宿舍
+7. **返回结果**：告诉你申请已受理
+
+这就是为什么 API Server 被称为 Kubernetes 的"心脏"——所有的操作都要经过它！
