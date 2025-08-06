@@ -841,7 +841,7 @@ ResourceQuota：院系预算管理办公室 🏛️
 
 大家好！今天接着上篇的namespace，继续Kubernetes的资源管理话题。大学的院系（namespace）分好了，但问题来了：如果不加管理，计算机科学系可能把整个学校的电费都用光！今天聊聊如何给院系设预算。
 
-## 核心问题：如何防止某个院系把学校搞破产？ 🤔
+核心问题：如何防止某个院系把学校搞破产？ 🤔
 
 精细管理是稳步发展的关键，来看看下面的情况：
 
@@ -930,7 +930,7 @@ spec:
     services: "5"                # 最多5个Service
 ```
 
-## 实际效果演示 🎬
+实际效果演示 🎬
 
 创建超预算的Pod会怎样？
 ```yaml
@@ -956,7 +956,7 @@ used: requests.memory=8Gi, limited: requests.memory=10Gi
 ```
 *翻译：物理系预算不够了！你要15GB，但总预算只有10GB，已经用了8GB*
 
-## 查看和管理
+查看和管理
 ```bash
 # 查看所有院系配额
 kubectl get quota --all-namespaces
@@ -968,7 +968,7 @@ kubectl describe quota cs-budget -n computer-science
 kubectl top pods -n computer-science
 ```
 
-## 最佳实践 💡
+最佳实践 💡
 
 - 生产环境：设置严格预算防止资源滥用
 - 开发环境：可以宽松一些便于调试和实验
@@ -976,7 +976,7 @@ kubectl top pods -n computer-science
 - 定期审查：根据实际使用情况调整配额
 - 分层管理：不同重要级别的院系设置不同预算
 
-## 一句话总结 🎯
+一句话总结 🎯
 
 ResourceQuota就像大学的财务处，给每个院系设置明确的资源预算，防止某个院系把学校搞破产，确保资源公平分配！ 🏛️
 
@@ -1022,7 +1022,7 @@ LimitRange = 宿舍标准（每个宿舍最多3kW，默认1kW）
 良好管理的宿舍标准让大家住得安心，好的 LimitRange 让 Pod 跑得稳定！
 
 
-## 宿舍标准配置实战 📋
+宿舍标准配置实战 📋
 
 计算机科学系的宿舍标准：
 ```yaml
@@ -1079,7 +1079,7 @@ spec:
       memory: 1Gi
 ```
 
-## 实际效果演示 🎬
+实际效果演示 🎬
 
 新学生入住时的自动配置：
 ```yaml
@@ -1107,7 +1107,7 @@ resources:
     memory: 256Mi
 ```
 
-## 查看和管理
+查看和管理
 ```bash
 # 查看宿舍标准
 kubectl describe limitrange cs-dorm-standards -n computer-science
@@ -1119,7 +1119,7 @@ kubectl get limitrange --all-namespaces
 kubectl describe pod new-student-pod -n computer-science
 ```
 
-## 一句话总结 🎯
+一句话总结 🎯
 
 **LimitRange就像宿舍管理规定，给每个宿舍设置用电用水标准，防止个别学生作妖，同时给新学生提供标准配置！** 🏠
 
@@ -1288,7 +1288,7 @@ spec:
       storage: 50Gi
 ```
 
-## 实际操作 🔧
+实际操作 🔧
 
 ```bash
 # 查看储物柜状态
@@ -1335,7 +1335,7 @@ AllowVolumeExpansion（扩容支持）：储物柜是否可以扩大
 StorageClass就像大学里的智能储物管理员，学生只需要提交申请，它就能自动采购、安装、配置储物柜，让存储管理从手工作坊升级为智能工厂！在 K8S 的世界，有了StorageClass，SRE再也不用半夜起来手动创建 PV 了，就它了！
 
 
-## 三种智能管理员 🎯
+三种智能管理员 🎯
 
 **本地存储管理员：**
 ```yaml
@@ -1382,7 +1382,7 @@ volumeBindingMode: Immediate               # 立即分配
 ```
 
 
-## 使用示例
+使用示例
 ```yaml
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -1399,7 +1399,7 @@ spec:
 ```
 
 
-## 常用命令 📋
+常用命令 📋
 
 ```bash
 # 查看所有StorageClass
@@ -1408,79 +1408,117 @@ kubectl get storageclass
 # 设置默认StorageClass
 kubectl patch storageclass aws-gp3-storage -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
 ```
+killercode:
+controlplane:~/k8s$ kubectl get sc
+NAME                   PROVISIONER             RECLAIMPOLICY   VOLUMEBINDINGMODE      ALLOWVOLUMEEXPANSION   AGE
+local-path (default)   rancher.io/local-path   Delete          WaitForFirstConsumer   false                  13d
+test-path              rancher.io/local-path   Retain          WaitForFirstConsumer   false                  4s
+
+1. sc.yaml 
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  annotations:
+    storageclass.kubernetes.io/is-default-class: "false"
+  name: test-path
+provisioner: rancher.io/local-path
+reclaimPolicy: Retain
+volumeBindingMode: WaitForFirstConsumer
+
+2. create pod.yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: test-pod
+spec:
+  containers:
+  - name: test-container
+    image: nginx
+    volumeMounts:
+    - name: test-volume
+      mountPath: /usr/share/nginx/html
+  volumes:
+  - name: test-volume
+    persistentVolumeClaim:
+      claimName: local-pvc
+
+3. create pvc
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: local-pvc
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+  storageClassName: local-path
+
+4. pod status become from pending to running
+5. kubectl delete pvc local-pvc
+6. kubectl get pvc : local-pvc is still there but status is terminating
+7. kubectl patch pvc local-pvc --type='merge' -p='{"metadata":{"deletionTimestamp":null}}'
+persistentvolumeclaim/local-pvc patched (no change)
+kubectl get pvc local-pvc -oyaml | grep -A10 finalizer
+
+8. kubectl patch pvc local-pvc -p '{"metadata":{"finalizers":null}}'
+persistentvolumeclaim/local-pvc patched
+pvc is deleted -- same effect as to remove whole finalizer section in yaml
+
+9 kubectl exec test-pod -- mkdir -p /usr/share/nginx/html/test
+mkdir: cannot create directory '/usr/share/nginx/html/test': No such file or directory
+command terminated with exit code 1
+
+10 kubectl get pv : pv had been deleted
 
 章节16:
-大家好！前面我们聊了共享宿舍（Pod）、楼管大妈（ReplicaSet）、总宿舍管理员（Deployment）、外卖调度中心（Service），今天来说说整个宿舍管理体系的核心——学校总务处（API Server）。
+大家好！前面我们从下往上聊了Kubernetes的共享宿舍（Pod）、楼管大妈（ReplicaSet）、总宿舍管理员（Deployment）、外卖调度中心（Service），今天来聊整个校园的核心——学校总务处（API Server）。
 
-API Server：学校总务处——万事都要找我
-想象一下，如果你是学生，想要申请宿舍、查询宿舍信息、投诉宿舍问题，你会去找谁？没错，就是学校总务处！在 Kubernetes 的世界里，API Server 就是这个"总务处"，它是整个集群的统一服务窗口。
+1️⃣ 想象一下，如果你是学生，想要申请宿舍、查询宿舍信息、投诉宿舍问题，你会去找谁？没错，就是学校总务处！在K8S的世界里，API Server就是这个"总务处"，它是整个集群的统一服务窗口。
 
-统一受理窗口：
-无论你是想创建新的共享宿舍（Pod），还是想调整宿舍数量（修改 Deployment），或者查看宿舍分配情况（查询资源状态），都必须通过总务处。就像现实中的总务处一样，它是唯一的官方渠道：
-- 想申请宿舍？填表交给总务处
-- 想退宿？找总务处办手续
-- 想投诉楼管？还是找总务处
-- 想查看宿舍费用？依然是总务处
+2️⃣ 请求统一受理
+无论你是想创建新的共享宿舍（Pod），还是想调整宿舍数量（修改Deployment），都必须通过总务处。它是唯一的官方渠道：
+想申请宿舍？想退宿？想投诉楼管？找总务处！
 
-身份验证和权限管理：
-总务处可不是谁来都给办事的。首先，你得出示学生证（身份认证），证明你是这个学校的人。然后，总务处还要检查你的权限：
-- 普通学生只能申请普通宿舍
-- 研究生可以申请研究生公寓
-- 教职工才能申请教师宿舍
-- 校长想住哪就住哪（管理员权限）
+3️⃣ 身份验证和权限管理
+总务处可不是谁来都给办事的。首先，你得出示学生证（身份认证），然后检查你的权限：
+👉 研究生可以申请研究生公寓
+👉 教职工才能申请教师宿舍
+如果你是个校外人员，想混进来申请宿舍？No Door!
 
-如果你是个校外人员，想混进来申请宿舍？门都没有！总务处的大妈眼睛可亮着呢，假学生证一眼就能看出来。
+4️⃣ 统一调度协调
+总务处接到申请后，开始协调各个相关部门：
+👉 通知楼管大妈（ReplicaSet）："给他安排个床位"
+👉 联系外卖调度中心（Service）："新宿舍的外卖地址记得更新"
+👉 协调后勤部门（Scheduler）："看看哪栋楼还有空房间"
+就像一个指挥中心，把需求传达给各个执行部门。
 
-统一调度协调：
-总务处接到你的申请后，可不是自己动手安排宿舍，而是协调各个相关部门：
-- 通知楼管大妈（ReplicaSet）："小王要住宿，给他安排个床位"
-- 联系外卖调度中心（Service）："新宿舍的外卖地址记得更新"
-- 协调后勤部门（Scheduler）："看看哪栋楼还有空房间"
-- 通知财务处："记得收宿舍费"
+5️⃣ 档案管理和信息存储
+总务处最重要的职责就是记录存档。所有的宿舍分配信息都存在档案室（etcd）里：
+👉 张三住在3号楼201室
+👉 李四的宿舍申请在审批中
+这些信息必须准确无误，因为其他部门都要依赖这些数据工作。
 
-就像一个指挥中心，总务处把你的需求传达给各个执行部门，确保每个环节都不出错。
+6️⃣ 标准化服务流程 
+为了提高效率，总务处制定了标准的API：
+👉 GET：查询信息，查看我的宿舍信息
+👉 POST：创建资源，申请新宿舍
+👉 PUT：更新信息，我要更换宿舍
+👉 DELETE：删除资源，我要退宿
+全校师生都按照统一的流程办事。
 
-档案管理和信息存储：
-总务处最重要的职责之一就是记录存档。所有的宿舍分配信息都存在总务处的档案室（etcd）里：
-- 张三住在3号楼201室，2023年9月1日入住
-- 李四的宿舍申请在审批中
-- 王五因为违纪被取消宿舍资格
+7️⃣ 高可用性
+如果总务处突然关门了，整个宿舍管理系统都会瘫痪！所以，API Server通常会部署多个副本，就像总务处会安排多个值班人员一样。
 
-这些信息必须准确无误，因为其他部门都要依赖这些数据工作。楼管大妈要知道哪个房间住了谁，外卖调度中心要知道哪些房间在营业，后勤部门要知道哪些房间需要维修。
+记住哈，当你使用kubectl命令时，请注意你其实是在和这个"总务处"打交道！
 
-实时监控和状态管理：
-总务处还有一个重要功能——实时掌握全校宿舍的使用情况。通过各种监控系统，总务处随时知道：
-- 哪个宿舍空了（Pod 挂了）
-- 哪个宿舍满员了（资源使用情况）
-- 哪个宿舍需要维修（节点故障）
-- 哪栋楼的入住率最高（负载均衡）
 
-一旦发现问题，总务处会立即协调相关部门处理。比如发现某个宿舍断电了，总务处会马上通知维修工人，同时安排楼管大妈临时调配其他房间。
-
-RESTful API：标准化服务流程
-为了提高效率，总务处还制定了标准化的服务流程（RESTful API）：
-- GET：查询信息（"我想查看我的宿舍信息"）
-- POST：创建资源（"我要申请新宿舍"）
-- PUT：更新信息（"我要更换宿舍"）
-- DELETE：删除资源（"我要退宿"）
-
-这样，无论是学生、老师还是其他部门，都按照统一的流程办事，避免了混乱和错误。
-
-高可用性：总务处不能停
-想象一下，如果总务处突然关门了会怎样？整个宿舍管理系统都会瘫痪！学生申请不了宿舍，楼管不知道该安排谁住哪，外卖送不到正确地址...
-
-所以，API Server 通常会部署多个副本，就像总务处会安排多个值班人员一样。即使某个工作人员请假了，其他人也能顶上，确保服务不中断。
-
-总结：
-API Server 作为 Kubernetes 的"总务处"，是整个集群管理的核心枢纽。它不仅是统一的服务入口，还负责身份验证、权限管理、资源协调、信息存储和实时监控。就像现实中的总务处一样，虽然它不直接管理具体的宿舍，但没有它，整个宿舍管理体系就无法正常运转。
-
-下次当你使用 kubectl 命令时，记住你其实是在和这个"总务处"打交道，它会帮你把需求传达给集群中的各个组件，让你的应用能够顺利运行在这个"宿舍大楼"里！
-
-## 实战演示：如何与总务处（API Server）打交道 💻
+实战演示：如何与总务处（API Server）打交道 💻
 
 虽然我们不能"创建"总务处，但可以通过各种方式与它交互：
 
-### 1️⃣ 基础的总务处业务办理（kubectl 命令）
+基础的总务处业务办理（kubectl 命令）
 ```bash
 # 查看总务处的基本信息
 kubectl cluster-info
@@ -1504,7 +1542,7 @@ kubectl describe pod nginx-pod
 kubectl delete pod nginx-pod
 ```
 
-### 2️⃣ 直接与总务处对话（REST API 调用）
+直接与总务处对话（REST API 调用）
 ```bash
 # 获取总务处的地址
 APISERVER=$(kubectl config view --minify -o jsonpath='{.clusters[0].cluster.server}')
@@ -1535,7 +1573,7 @@ curl -X POST $APISERVER/api/v1/namespaces/default/pods \
   --insecure
 ```
 
-### 3️⃣ 编程方式与总务处交互（Python 客户端）
+编程方式与总务处交互（Python 客户端）
 ```python
 from kubernetes import client, config
 
@@ -1570,7 +1608,7 @@ v1.create_namespaced_pod(namespace="default", body=pod_manifest)
 print("宿舍申请已提交！")
 ```
 
-### 4️⃣ 监控总务处的工作状态
+监控总务处的工作状态
 ```bash
 # 查看总务处的健康状态
 kubectl get componentstatuses
@@ -1585,7 +1623,7 @@ kubectl logs -n kube-system kube-apiserver-<node-name>
 kubectl get events --sort-by=.metadata.creationTimestamp
 ```
 
-### 5️⃣ 总务处的权限验证演示
+总务处的权限验证演示
 ```bash
 # 创建一个受限用户（普通学生）
 kubectl create serviceaccount student-user
@@ -1603,7 +1641,7 @@ kubectl --as=system:serviceaccount:default:student-user delete pod nginx-pod
 # ❌ 没有权限删除宿舍
 ```
 
-### 6️⃣ 总务处的负载均衡演示
+总务处的负载均衡演示
 ```yaml
 # 如果你有多个API Server（多个总务处窗口）
 apiVersion: v1
@@ -1620,7 +1658,7 @@ subsets:
     protocol: TCP
 ```
 
-## 总务处的幕后工作流程 🔄
+总务处的幕后工作流程 🔄
 
 当你执行 `kubectl apply -f pod.yaml` 时，总务处的工作流程：
 
