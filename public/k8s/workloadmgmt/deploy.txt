@@ -1121,7 +1121,7 @@ kubectl describe pod new-student-pod -n computer-science
 
 一句话总结 🎯
 
-**LimitRange就像宿舍管理规定，给每个宿舍设置用电用水标准，防止个别学生作妖，同时给新学生提供标准配置！** 🏠
+LimitRange就像宿舍管理规定，给每个宿舍设置用电用水标准，防止个别学生作妖，同时给新学生提供标准配置！ 🏠
 
 *记住：好的宿舍标准让大家住得安心，好的LimitRange让Pod跑得稳定！* ⚡
 
@@ -1170,7 +1170,7 @@ PV & PVC：大学的储物柜管理系统 📦
 
 对于SRE来说，存储管理是保障业务连续性的关键环节。没有持久化存储，应用重启后数据就丢失了，这在生产环境是不可接受的。K8S 提供的 PV 储物柜和 PVC 申请单的完整体系，让数据和应用分离，确保Pod重启后数据依然安全！
 
-**本地储物柜（HostPath PV）：**
+本地储物柜（HostPath PV）：
 ```yaml
 apiVersion: v1
 kind: PersistentVolume
@@ -1188,7 +1188,7 @@ spec:
     type: DirectoryOrCreate          # 目录不存在就创建
 ```
 
-**网络共享储物柜（NFS PV）：**
+网络共享储物柜（NFS PV）：
 ```yaml
 apiVersion: v1
 kind: PersistentVolume
@@ -1206,7 +1206,7 @@ spec:
     path: /shared/storage           # 共享目录路径
 ```
 
-**个人储物柜申请：**
+个人储物柜申请：
 ```yaml
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -1222,7 +1222,7 @@ spec:
       storage: 5Gi                   # 申请5GB空间
 ```
 
-**共享储物柜申请：**
+共享储物柜申请：
 ```yaml
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -1239,7 +1239,7 @@ spec:
 ```
 
 
-**匹配条件：** 容量匹配、访问模式匹配、存储类型匹配
+匹配条件： 容量匹配、访问模式匹配、存储类型匹配
 ```yaml
 apiVersion: v1
 kind: Pod
@@ -1258,7 +1258,7 @@ spec:
       claimName: my-personal-storage    # 使用申请的储物柜
 ```
 
-**RWO示例（个人储物柜）：**
+RWO示例（个人储物柜）：
 ```yaml
 # 数据库Pod专用存储
 apiVersion: v1
@@ -1273,7 +1273,7 @@ spec:
       storage: 10Gi
 ```
 
-**RWX示例（共享储物柜）：**
+RWX示例（共享储物柜）：
 ```yaml
 # 多个Pod共享的日志存储
 apiVersion: v1
@@ -1337,7 +1337,7 @@ StorageClass就像大学里的智能储物管理员，学生只需要提交申�
 
 三种智能管理员 🎯
 
-**本地存储管理员：**
+本地存储管理员：
 ```yaml
 apiVersion: storage.k8s.io/v1
 kind: StorageClass
@@ -1349,7 +1349,7 @@ allowVolumeExpansion: false                # 不支持扩容
 reclaimPolicy: Delete                      # 用完就删除
 ```
 
-**云存储管理员：**
+云存储管理员：
 ```yaml
 apiVersion: storage.k8s.io/v1
 kind: StorageClass
@@ -1365,7 +1365,7 @@ reclaimPolicy: Delete                      # 自动清理
 volumeBindingMode: Immediate               # 立即分配
 ```
 
-**网络存储管理员：**
+网络存储管理员：
 ```yaml
 apiVersion: storage.k8s.io/v1
 kind: StorageClass
@@ -1662,12 +1662,72 @@ subsets:
 
 当你执行 `kubectl apply -f pod.yaml` 时，总务处的工作流程：
 
-1. **接收请求**：总务处收到你的宿舍申请
-2. **身份验证**：检查你的学生证是否有效
-3. **权限检查**：确认你有申请这类宿舍的权限
-4. **数据验证**：检查申请表是否填写正确
-5. **存储记录**：将申请信息存入档案室（etcd）
-6. **通知相关部门**：告诉调度器（Scheduler）安排宿舍
-7. **返回结果**：告诉你申请已受理
+1. 接收请求：总务处收到你的宿舍申请
+2. 身份验证：检查你的学生证是否有效
+3. 权限检查：确认你有申请这类宿舍的权限
+4. 数据验证：检查申请表是否填写正确
+5. 存储记录：将申请信息存入档案室（etcd）
+6. 通知相关部门：告诉调度器（Scheduler）安排宿舍
+7. 返回结果：告诉你申请已受理
 
 这就是为什么 API Server 被称为 Kubernetes 的"心脏"——所有的操作都要经过它！
+
+章节17:
+Kubernetes API Server的特殊身份：静态pod
+大家好！之前我们聊了API Server这个"学校总务处"，在操作视频中也看到了API Server其实是kube-system命名空间下的一个Pod。
+今天来揭开它的神秘面纱——为什么API Server这么特殊？答案就在于它的"特殊身份"：静态Pod！
+
+1️⃣ 什么是静态Pod 🤔
+想象一下，在我们的K8S大学里，大部分学生住在由楼管大妈（ReplicaSet）管理的普通共享宿舍（Pod）里。但是，总务处的工作人员却住在特殊的"VIP宿舍"里——这就是静态Pod！
+
+2️⃣ 静态Pod的特点：
+👉 不需要通过总务处申请
+👉 直接由设施维护员(kubelet)管理
+👉 通常运行在控制平面节点(master节点)上
+👉 配置文件就放在本地，随时可以查看
+👉 一旦配置文件改变，立即"搬家"重建
+
+3️⃣ 为什么要用静态Pod？🏠
+这里有个"鸡生蛋，蛋生鸡"的问题：普通Pod需要通过API Server创建，但如果API Server本身也需要通过API Server来创建，那谁来创建它呢？🤯
+
+K8s设计者想出了绝妙方案：让API Server自力更生，住进"静态Pod"这种特殊宿舍！
+工作原理：
+👉 设施维护员有特殊文件夹，里面放着"宿舍设计图"
+👉 kubelet每隔几秒检查这个文件夹
+👉 发现设计图变化，立即重建宿舍
+
+4️⃣ 静态Pod的神奇特性
+👉 配置即生效
+修改配置文件 → 保存 → 几秒后Pod自动重建 → 新配置生效。就像魔法一样！
+👉 本地文件管理，如图2
+👉 自动恢复机制：即使API Server挂了，kubelet 仍能管理API Server这个静态Pod本身，会自动尝试重启它。
+👉 无法直接删除：用kubectl删除API Server的Pod会发现几秒后又出现了！因为kubelet看到配置文件还在，会立即重建。
+
+5️⃣ 静态Pod家族成员
+K8s集群中的控制平面组件都是静态Pod，除了API Server以外，后续我会继续介绍其他组件
+
+API Server使用静态Pod这种特殊身份，就像住在"VIP宿舍"里的总务处工作人员——不需要通过自己来申请宿舍，直接由设施维护员（kubelet）根据本地配置文件管理，实现了"自力更生"的完美闭环！
+
+
+实际操作体验 🛠️
+
+想体验静态Pod的神奇吗？试试这个：
+
+```bash
+# 1. 查看当前API Server配置
+sudo cat /etc/kubernetes/manifests/kube-apiserver.yaml
+
+# 2. 备份原文件
+sudo cp /etc/kubernetes/manifests/kube-apiserver.yaml /tmp/backup.yaml
+
+# 3. 修改一个无关紧要的标签
+sudo vim /etc/kubernetes/manifests/kube-apiserver.yaml
+# 在metadata.labels下加一行：test: "modified"
+
+# 4. 保存后观察Pod重建
+watch kubectl get pods -n kube-system | grep apiserver
+
+# 5. 恢复原配置
+sudo cp /tmp/backup.yaml /etc/kubernetes/manifests/kube-apiserver.yaml
+```
+
