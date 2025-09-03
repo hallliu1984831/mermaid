@@ -1731,3 +1731,87 @@ watch kubectl get pods -n kube-system | grep apiserver
 sudo cp /tmp/backup.yaml /etc/kubernetes/manifests/kube-apiserver.yaml
 ```
 
+章节18: K8S Controller Manager：校园管理中枢
+
+大家好，之前介绍了总务处（API Server），我们再来聊聊与总务处密切配合的另一个重要角色——Controller Manager，它就像是学校里各部门主管的联合办公室。
+
+1️⃣ Controller Manager 的核心职责：
+声明式管理：根据总务处的决策，自动创建、更新或删除资源
+监督执行：24/7不间断工作，每隔一段时间检查检查集群状态，确保总务处的决定被正确执行
+自动修复：发现问题立即纠正，确保集群始终处于健康状态
+
+就像学校里有专门的主管定期巡查，确保各部门按照学校政策执行工作
+
+2️⃣ ReplicaSet Controller：楼管大妈的直属领导
+```yaml
+# 当总务处批准了宿舍申请后
+apiVersion: apps/v1
+kind: Deployment
+spec:
+  replicas: 3  # 总务处说：需要3个宿舍
+```
+
+Controller Manager的工作：
+- 监控：发现只有2个宿舍在运行
+- 决策：需要再创建1个宿舍
+- 执行：通知楼管大妈（ReplicaSet）安排新宿舍
+- 验证：确认新宿舍创建成功
+
+3️⃣ Deployment Controller：总宿舍管理员的监督者
+```bash
+# 当需要升级宿舍设施时
+kubectl set image deployment/nginx-deployment nginx=nginx:1.22
+```
+
+Controller Manager的工作：
+1. 监听变化：发现Deployment配置更新了
+2. 制定计划：创建新的ReplicaSet（新楼管）
+3. 滚动更新：逐步替换旧宿舍为新宿舍
+4. 清理工作：删除旧的ReplicaSet（辞退旧楼管）
+
+4️⃣ Node Controller：宿舍楼管理员
+```bash
+# 监控宿舍楼（Node）的健康状态
+kubectl get nodes
+NAME     STATUS   ROLES    AGE   VERSION
+node-1   Ready    worker   10d   v1.28.0
+node-2   NotReady worker   10d   v1.28.0  # 这栋楼出问题了！
+```
+
+Controller Manager的应急处理：
+1. 发现问题：node-2宿舍楼失联了
+2. 标记状态：将该楼标记为"不可用"
+3. 疏散住户：将楼内的Pod迁移到其他楼
+4. 等待恢复：持续监控楼的状态
+
+
+### 实际的Controller Manager操作：
+
+```bash
+# 查看Controller Manager的状态
+kubectl get componentstatuses
+NAME                 STATUS    MESSAGE             ERROR
+controller-manager   Healthy   ok
+
+# 查看Controller Manager的日志
+kubectl logs -n kube-system kube-controller-manager-master
+
+# 查看所有正在运行的Controllers
+kubectl get pods -n kube-system | grep controller-manager
+```
+
+Controller Manager 与 API Server 的协作：
+
+```
+1. API Server: "有新的Deployment创建了！"
+2. Controller Manager: "收到！我来处理"
+3. Controller Manager: "需要创建ReplicaSet"
+4. API Server: "好的，已记录"
+5. Controller Manager: "ReplicaSet需要创建Pod"
+6. API Server: "明白，通知Scheduler调度"
+```
+
+
+Controller Manager就像是学校里那些默默无闻但极其重要的中层管理者，他们不直接面对学生，但确保学校的各项政策能够被正确执行。当总务处批准了你的宿舍申请后，是Controller Manager确保你真的能住进宿舍；当你要求升级宿舍时，是Controller Manager制定和执行具体的升级计划。
+
+如果没有它，整个宿舍管理体系就只是一堆静态的规章制度，无法自动化、智能化地运转。它是让K8S"活起来"的关键组件！
