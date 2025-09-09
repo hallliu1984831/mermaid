@@ -7,6 +7,7 @@
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
 </head>
 <body>
+    <h2>中文版本 (Chinese Version)</h2>
     <div class="mermaid">
         graph LR
             subgraph K8S集群
@@ -31,8 +32,34 @@
                     W2 --> S4[数据收集应用POD4]
                 end
                 MasterNodes -- 为确保高可靠性和适当的负载分配，任意的master节点都可以单独控制所有的worker节点 --> WorkerNodes
+            end
+    </div>
 
+    <h2>English Version</h2>
+    <div class="mermaid">
+        graph LR
+            subgraph K8SCluster
+                %% Define MasterNodes as a vertical subgraph
+                subgraph MasterNodes
+                    direction TB
+                    M1[Master Node 1]
+                    M2[Master Node 2]
+                    M3[Master Node 3]
+                end
 
+                %% Define WorkerNodes as a horizontal subgraph
+                subgraph WorkerNodes
+                    direction TB
+                    W1[Worker Node 1]
+                    W2[Worker Node 2]
+                    W3[Worker Node 3]
+                    W4[Worker Node 4]
+                    W2 --> S1[Data Collection App POD1]
+                    W2 --> S2[Data Collection App POD2]
+                    W2 --> S3[Data Collection App POD3]
+                    W2 --> S4[Data Collection App POD4]
+                end
+                MasterNodes -- To ensure high reliability and proper load distribution, any master node can independently control all worker nodes --> WorkerNodes
             end
     </div>
 </body>
