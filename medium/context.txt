@@ -1,0 +1,347 @@
+Sep 7, 2025
+----- Chinese
+探索SRE：站在可靠性的最前线
+大家好，我是一名SRE，也就是“网站可靠性工程师”（Site Reliability Engineer）。说白了，我的工作就是让各种网站、App和服务不出问题，能稳定、高效地运行。我身后没有披风，但我觉得自己是某种意义上的“幕后英雄”，因为我的任务就是拯救系统崩溃，保障用户体验。那么，我每天到底在做什么呢？跟我一起看看吧！
+	
+可靠性：SRE的核心使命
+作为SRE，我最重要的职责就是让系统“靠谱”。比如，当你深夜点外卖、用App买电影票或者刷短视频时，这些服务都得正常运行，不然你可能会抓狂，对吧？为了做到这一点，我会设定一些目标，比如“系统99.9%的时间都要在线”，然后通过优化架构、修复漏洞，来让系统变得稳定又坚强。
+	
+监控：SRE的千里眼
+我的日常离不开“监控”（Monitoring）。我会用一些酷炫的工具，比如Prometheus和Grafana，还有其他一系列的工具来盯着系统的运行状态。比如，流量是不是突然飙升了？服务器是不是开始发热了？一旦发现异常，我就能第一时间出手，防止问题扩大。可以说，监控工具是我的眼睛，帮我随时掌握系统的健康状态。
+	
+自动化：解放双手的秘诀
+说实话，重复干同样的事情真的很无聊。所以，SRE的座右铭之一就是“能自动化的绝不手动”。我的工作之一就是写脚本和程序，让系统自动处理一些常见问题，比如自动扩展服务器容量，自动重启服务，甚至自动预警。有了自动化，我可以把时间花在更重要、更有挑战的事情上。
+	
+可扩展性：从容应对高峰
+我经常跟朋友开玩笑说，我的工作就是让“双十一”不宕机。每次大促、直播爆火时，流量都会暴涨，这对系统是个大考验。而我的任务就是提前设计好系统，让它能灵活扩展，扛住压力。看到用户买买买、刷刷刷时，我都觉得特别骄傲，因为这背后有我的努力。
+	
+事件管理：危机中的冷静大脑
+当然，天有不测风云，再完美的系统也有可能突然崩了。这个时候，我就变成了“危机处理专家”。当警报响起，我会迅速定位问题，想办法恢复服务，同时组织团队总结复盘，避免同样的错误再次发生。虽然紧张，但每次成功解决问题后，那种成就感真的超爽。
+	
+说真的，SRE这个职业对我来说不只是工作，更是一种挑战和乐趣。我既能动手写代码，又能设计系统，还能快速解决问题，每天都充满新鲜感。
+接下来，我会总结并分享SRE日常工作内容，同时欢迎大家和我一起互动，互相交流 ：）
+
+----- English 
+Exploring SRE: Standing at the Forefront of Reliability
+Hi everyone, I'm an SRE, which stands for "Site Reliability Engineer." Simply put, my job is to ensure that various websites, apps, and services don't break down and can run stably and efficiently. I may not wear a cape, but I consider myself a "behind-the-scenes hero" in some sense, because my mission is to rescue system crashes and ensure user experience. So, what exactly do I do every day? Let's take a look together!
+
+Reliability: The Core Mission of SRE
+As an SRE, my most important responsibility is to make systems "reliable." For example, when you order takeout late at night, buy movie tickets through an app, or scroll through short videos, these services must run normally, otherwise you might go crazy, right? To achieve this, I set some goals, like "the system must be online 99.9% of the time," and then optimize architecture and fix vulnerabilities to make the system stable and robust.
+
+Monitoring: SRE's All-Seeing Eyes
+My daily work is inseparable from "monitoring." I use some cool tools like Prometheus and Grafana, along with other series of tools to keep an eye on the system's operational status. For instance, is traffic suddenly spiking? Are the servers starting to overheat? Once I detect anomalies, I can take action immediately to prevent problems from escalating. You could say that monitoring tools are my eyes, helping me stay on top of the system's health status at all times.
+
+Automation: The Secret to Freeing Your Hands
+Honestly, doing the same repetitive tasks is really boring. So, one of SRE's mottos is "automate everything that can be automated, never do it manually." Part of my job is writing scripts and programs to let the system automatically handle common issues, such as automatically scaling server capacity, automatically restarting services, and even automatic alerts. With automation, I can spend time on more important and challenging tasks.
+
+Scalability: Handling Peak Traffic with Ease
+I often joke with friends that my job is to prevent systems during events like Black Friday from crashing. Every time there are major promotions or live streams go viral, traffic surges dramatically, which is a major test for the system. My task is to design the system in advance so it can scale flexibly and withstand the pressure. When I see users shopping and browsing frantically, I feel particularly proud because my efforts are behind all of this.
+
+Incident Management: The Calm Mind in Crisis
+Of course, unexpected things happen, and even the most perfect systems can suddenly crash. At times like these, I become a "crisis management expert." When alarms go off, I quickly locate problems, find ways to restore services, while organizing the team to summarize and review to prevent the same mistakes from happening again. Although it's stressful, the sense of achievement after successfully solving problems is absolutely amazing.
+
+Honestly, the SRE profession is not just a job for me, but also a challenge and source of enjoyment. I can both write code and design systems, as well as solve problems quickly. Every day is full of fresh experiences.
+
+Next, I will summarize and share the daily work content of SRE, and I welcome everyone to interact and exchange ideas with me :)
+
+Sep 9,2025
+----- Chinese
+探索SRE：K8S集群POD调度问题描述
+大家好，今天分享一个日常工作中遇到的产线问题，欢迎大家一起头脑风暴。
+我们使用 Kubernetes 集群部署了一系列服务，其中一个数据收集app，用于扫描约 8,500 个对象并收集相应数据，配置如下：
+K8S 集群：3 个主节点，4 个工作节点。
+数据收集app:部署了 6 个 Pod (replicas=6)，以提高任务的并发处理能力。
+app运行时为每个扫描对象创建线程，每个线程负责处理一部分扫描任务。
+app通过 K8S 的 Service 端口以 1 分钟的间隔被持续调用。
+Service 通过负载均衡将请求分配到具体的 Pod ，并执行扫描任务。
+﻿#SRE﻿
+问题描述
+服务通过CI/CD部署后，所有POD副本都被调度到了工作节点 2(如图)，而没有均匀分布到其他工作节点。这种调度不均衡导致如下问题：
+每个 Pod 创建大量线程处理扫描任务。当 6 个 Pod 全部集中在工作节点 2 上运行时，线程数量快速增长，最终耗尽了节点的线程资源。
+当节点2部署的任意服务尝试创建更多线程时，因节点已达到线程上限，导致服务报错，日志显示：OpenBLAS blas_thread_init: pthread_create failed for thread 44 of 48: Resource temporarily unavailable。该错误表明线程创建失败，原因是节点无法为新线程分配资源。
+工作节点 2 彻底崩溃，无法继续运行任务，对整个集群的稳定性造成了影响。
+参考点
+Linux节点线程上限为 65,535（默认配置，通过 /proc/sys/kernel/threads-max 和 ulimit -u 控制）。
+数据收集服务依赖多线程模型，每个线程负责一部分扫描对象。由于扫描对象数量较大且间隔一分钟被调用，服务需要创建足够多的线程并发执行任务，以保障数据收集的效率。
+默认线程上限（65,535）是为了支持高并发需求。如果上限较低，服务可能无法充分利用 CPU 资源，导致性能瓶颈。
+问题总结
+由于 K8S 调度问题，所有 Pod 被集中调度到单个工作节点，导致线程资源迅速耗尽，最终引发节点崩溃。尽管线程上限（65,535）设计用于支持高并发需求，但在资源分配不均的情况下，这一上限反而成为了瓶颈，限制了服务的正常运行。
+由于平台对笔记的篇幅限制，无法添加更多内容，请关注后续，咱们继续聊
+
+----- English
+Exploring SRE: K8S Cluster POD Scheduling Issue Description
+Hi everyone, today I'd like to share a production issue I encountered in my daily work. Welcome everyone to brainstorm together.
+Application infrastructure：
+We deployed a series of services using a Kubernetes cluster, including a data collection app that scans approximately 8,500 objects and collects corresponding data. The configuration is as follows:
+
+- K8S Cluster: 3 master nodes, 4 worker nodes
+- Data collection app: 6 Pods deployed (replicas=6) to improve task concurrency processing capability
+- Application runtime: The application creates a thread for each scanning object, with each thread responsible for handling a portion of the scanning tasks
+- Invocation pattern: The app is invoked continuously through K8S Service port at 1-minute intervals
+- Load distribution: The K8S Service uses load balancing to distribute requests to specific Pods for executing scanning tasks
+Issue Description
+After the service was deployed via CI/CD, all POD replicas were scheduled to worker node 2 (as shown in the diagram below), rather than being evenly distributed across other worker nodes.
+This uneven scheduling caused the following problems:
+1. Each Pod created a large number of threads to handle scanning tasks. When all 6 Pods were concentrated on worker node 2, the thread count rapidly increased, eventually exhausting the node's thread resources.
+2. When any service deployed on node 2 attempted to create additional threads, the node had reached its thread limit, causing service failures. The logs showed:
+"OpenBLAS blas_thread_init: pthread_create failed for thread 44 of 48: Resource temporarily unavailable."
+This error indicated thread creation failure because the node could not allocate resources for new threads.
+3. Worker node 2 completely crashed and could not continue running tasks, affecting the stability of the entire cluster.
+Reference Points
+- Linux node thread limit is 65,535 (default configuration, controlled by /proc/sys/kernel/threads-max and ulimit -u).
+- The data collection service relied on a multi-threaded model, with each thread responsible for a portion of scanning objects. Due to the large number of scanning objects and being called at one-minute intervals, the service needed to create sufficient threads to execute tasks concurrently, ensuring data collection efficiency.
+- The default thread limit (65,535) was designed to support high concurrency requirements. If the limit was too low, the service might not have been able to fully utilize CPU resources, leading to performance bottlenecks.
+Issue Summary
+Due to K8S scheduling issues, all Pods were concentrated on a single worker node, causing thread resources to be quickly exhausted and ultimately leading to node crash. Although the thread limit (65,535) was designed to support high concurrency requirements, in cases of uneven resource allocation, this limit became a bottleneck that restricted normal service operation.
+Stay tuned for the next part where we'll discuss the root cause analysis and solution implementation!
+
+Sep 12,2025
+----- Chinese
+探索 SRE：K8S 集群 Pod 调度问题修复
+大家好，咱来聊聊上篇帖子提到的问题是如何解决的。
+问题回顾
+上篇提到由于 K8S 调度问题，数据收集app的所有 Pod 被集中调度到单个工作节点。每个 Pod 会创建大量线程来并发处理任务，最终导致线程资源耗尽（线程上限为 65,535），节点崩溃，服务停止运行。
+	
+解决思路: 如何让应用的Pod 相对均匀分布到所有工作节点上。
+	
+方案 1：Pod 反亲和性
+Anti-Affinity是一种通过调度约束避免 Pod 聚集在同一节点的方法，适用于需要服务高可用性或资源隔离的场景。
+配置规则：通过定义调度约束，基于 Pod 标签设置反亲和性规则。例如：避免同一服务的多个 Pod 副本调度到同一节点。
+约束类型：强制规则（requiredDuringSchedulingIgnoredDuringExecution）：Pod 调度时必须满足反亲和性要求，否则无法被调度；软规则（preferredDuringSchedulingIgnoredDuringExecution）：调度时尽量满足反亲和性，无法满足时允许调度到不符合规则的节点。
+拓扑范围：通过 topologyKey 定义反亲和性生效的范围，比如按节点主机名（kubernetes.io/hostname）分布。
+	
+方案 2：Pod 拓扑分布约束
+maxSkew 是 Pod拓扑分布约束的一部分，用于限制 Pod 在不同节点或区域之间的分布偏差。相比 Pod 反亲和性，maxSkew 提供了更灵活的调度策略，允许一定的分布偏差。
+定义分布偏差：maxSkew 指定 Pod 在不同拓扑域（如节点）之间的数量差异。例如：maxSkew: 1 表示每个节点之间的 Pod 数量差异最多为 1。
+调度策略：whenUnsatisfiable: DoNotSchedule：如果无法满足分布约束，则 Pod 不会被调度。
+调度器会尽量保证 Pod 均匀分布在不同节点。
+	
+问题解决
+在评估了两种方案后，我选择了方案 2:maxSkew，因为它可以更灵活地控制 Pod 的分布偏差，同时允许一定程度的调度容忍性，避免因强制规则导致调度失败。
+在配置了适当的 maxSkew 参数后，通过 CI/CD 重新部署了应用，其Pod 副本成功分布到工作节点上，整个服务和集群运行稳定。
+	
+后续我们来聊聊这个问题是如何被发现的，欢迎大家一起讨论
+
+----- English
+Exploring SRE: K8S Cluster Pod Scheduling Issue Fix
+
+Hello everyone, let's discuss how we fixed the issue mentioned in the last story:Exploring SRE: K8S Cluster POD Scheduling Issue Description
+
+Issue Recap
+As mentioned in the previous post, due to K8S scheduling issues, all data collection app Pods were concentrated on a single worker node. Each Pod created a large number of threads to handle tasks concurrently, ultimately leading to thread resource exhaustion (thread limit of 65,535), causing the node to crash, and service failure.
+Solution Approach: How to distribute application Pods relatively evenly across all worker nodes.
+
+Solution 1: Pod Anti-Affinity
+Anti-Affinity is a method that uses scheduling constraints to prevent Pods from clustering on the same node, suitable for scenarios requiring high service availability or resource isolation.
+Configuration rules: Define scheduling constraints by setting anti-affinity rules based on Pod labels. For example: prevent multiple replicas of the same Pod from being scheduled to the same node.
+Constraint types:
+- Hard rules (requiredDuringSchedulingIgnoredDuringExecution): Pods must satisfy anti-affinity requirements during scheduling, otherwise they cannot be scheduled
+- Soft rules (preferredDuringSchedulingIgnoredDuringExecution): Attempt to satisfy anti-affinity during scheduling, but allow scheduling to non-compliant nodes when requirements cannot be met
+Topology scope: Define the scope where anti-affinity takes effect through topologyKey, such as distribution by node hostname (kubernetes.io/hostname).
+
+Solution 2: Pod Topology Spread Constraints
+maxSkew is part of Pod topology spread constraints, used to limit the distribution deviation of Pods across different nodes or zones. Compared to Pod anti-affinity, maxSkew provides more flexible scheduling strategies, allowing certain distribution deviations.
+Define distribution deviation: maxSkew specifies the quantity difference of Pods between different topology domains (such as nodes). For example: maxSkew: 1 means the Pod quantity difference between each node is at most 1.
+Scheduling strategy: whenUnsatisfiable: DoNotSchedule: If distribution constraints cannot be satisfied, the Pod will not be scheduled.
+The scheduler will try to ensure Pods are evenly distributed across different nodes.
+
+Issue Fix
+After evaluating both solutions, I chose Solution 2: maxSkew, because it can more flexibly control Pod distribution deviation while allowing a certain degree of scheduling tolerance, avoiding scheduling failures caused by hard rules.
+After configuring appropriate maxSkew parameters, the application was redeployed through CI/CD, and its Pod replicas were successfully distributed across worker nodes, with the entire service and cluster running stably.
+
+Summary
+Anti-Affinity is about separation: "Keep Pod A away from Pod B."
+maxSkew is about balance: "Spread all these identical pods out as evenly as you can."
+
+Next, we'll discuss how this problem was discovered. Welcome everyone to join the discussion.
+
+Sep 15, 2025
+----- Chinese
+探索 SRE：K8S 集群 POD 调度问题追踪过程
+
+问题初现：4月29日，监控系统探测到异常后，自动发出告警并推送到即时聊天工具，提示K8S集群中有多个Pod状态为CrashLoopBackOff，且间隔15分钟持续推送3次以上。排除偶发情况以后，值班SRE介入。
+	
+初步分析：
+CrashLoopBackOff 表示Pod无法正常启动，可能由于应用本身问题、资源限制或底层节点问题导致。Pod错误log如之前帖子提到的：thread_init: Resource temporarily unavailable。
+为了更快恢复服务，决定从底层节点资源入手，逐步排查问题根源。
+	
+定位工作节点：资源耗尽初现端倪
+通过检查问题Pod的调度情况，发现这些Pod均运行在工作节点d01上。通过SSH登录到节点d01尝试深入分析，却发现在切换用户时出现以下异常：
+-bash: fork: Cannot allocate memory
+初步现象：节点无法创建新进程，提示“Cannot allocate memory”，表明节点可能已经耗尽了资源（如内存或线程）。
+至此，内存耗尽的根本原因尚不明确。
+在没有更多线索的情况下，为了恢复服务功能并保持集群的稳定性，团队决定重启节点d01。
+	
+问题复现：间歇性中断
+5月4日晚，类似问题再次发生，监控系统持续推送告警，d01节点上的多个Pod再次CrashLoopBackOff，节点资源再次耗尽。团队再次重启节点，恢复服务。
+问题特点：
+每隔几天复现一次，表现出间歇性。
+重启后问题暂时缓解，但未解决根因。
+	
+深入排查：关键发现
+劳动节后，团队对d01节点进行全面检查，发现节点上存在多个相同的Java进程，且每个进程平均使用8000+线程。
+进一步调查确认，这些Java进程均属于数据收集app的pod副本，负责扫描8k+对象并处理数据。app的多个副本同时调度在d01上消耗大量线程成为资源耗尽的核心原因。
+	
+故事的后续，大家可以参考前面的帖子，在此我简要说明下SRE的主要职责：
+监控与告警：对集群进行有效监控并确保监控工具自动且及时推送告警。
+优先恢复服务：快速恢复功能，确保告警消除。
+问题定位与修复：深入分析根因，跟进修复问题。
+
+
+----- English
+Exploring SRE: K8S Cluster Pod Scheduling Issue Track Process
+
+Hello everyone, let's discuss how we track the issue mentioned in the last story:Exploring SRE: K8S Cluster POD Scheduling Issue Description
+
+Initial Analysis:
+CrashLoopBackOff indicates that Pods cannot start normally, possibly due to application issues, resource limitations, or underlying node problems. Pod error logs showed the same issue mentioned in previous posts: "thread_init: Resource temporarily unavailable."
+To restore service more quickly, we decided to start from the underlying node resources and gradually investigate the root cause.
+
+Locating Worker Node: Resource Exhaustion Emerges
+By checking the scheduling status of problematic Pods, we found that these Pods were all running on worker node d01. When we SSH'd into node d01 for deeper analysis, we encountered the following anomaly when switching users:
+-bash: fork: Cannot allocate memory
+
+Initial observation: The node could not create new processes, showing "Cannot allocate memory," indicating that the node had likely exhausted resources (such as memory or threads).
+At this point, the root cause of memory exhaustion was still unclear.
+Without more clues, to restore service functionality and maintain cluster stability, SRE team decided to restart node d01.
+
+Problem Recurrence: Intermittent Interruptions**
+On the evening of May 4th, similar problems occurred again. The monitoring system continuously pushed alerts, multiple Pods on node d01 experienced CrashLoopBackOff again, and node resources were exhausted once more. The team restarted the node again to restore service.
+
+Problem characteristics:
+- Recurred every few days, showing intermittent behavior
+- Problems were temporarily alleviated after restart, but root cause remained unresolved
+
+Deep Investigation: Key Discovery
+Couple of days later, the team conducted a comprehensive check of node d01 and discovered multiple identical Java processes on the node, with each process using an average of 8000+ threads.
+Further investigation confirmed that these Java processes all belonged to Pod replicas of the data collection app, responsible for scanning 8k+ objects and processing data. Multiple replicas of the app being scheduled simultaneously on d01 and consuming massive threads became the core reason for resource exhaustion.
+
+For the continuation of this story, you can refer to previous posts. Here I'll briefly explain the main responsibilities of SRE:
+- **Monitoring and Alerting**: Effectively monitor the cluster and ensure monitoring tools automatically and promptly push alerts
+- **Priority Service Recovery**: Quickly restore functionality and ensure alerts are cleared
+- **Problem Location and Fix**: Deep analysis of root causes, follow up on problem fixes
+
+Sep 18, 2025
+----- Chinese
+海因里希法则：预防小问题，避免大灾难
+大家好，今天我们来一起学习下安全生产的理论知识(换一个学习的首页图片😂)，从海因里希法则开始。
+	
+1️⃣ 海因里希法则
+如图2，Heinrich法则最初来源于工业安全领域，由安全专家Herbert William Heinrich在20世纪30年代提出。它描述了事故的发生规律：
+‼️‼️‼️ 每一起严重事故的背后，往往有29起轻微事故，以及300起未遂事件或隐患。
+换句话说，重大事故往往是由一系列较小的问题积累或未被解决的隐患所引发的。如果我们能及时识别和处理这些小问题，就可以有效地预防更严重的后果。
+	
+2️⃣ 在SRE领域，我们致力于通过提高系统的可靠性和稳定性，来为用户提供始终如一的服务体验。为了实现这一目标，我们不仅要解决已经发生的问题，更需要从潜在问题中学习，防患于未然。在这一过程中，Heinrich法则为我们提供了一个极具价值的视角。
+在SRE实践中，Heinrich法则有着广泛的应用场景。尽管它源于安全领域，但其核心思想——通过关注和解决小问题来避免大问题——与SRE的目标高度契合。以下是几个关键点：
+ 小问题积累导致大故障
+在复杂的分布式系统中，几乎所有的重大系统故障（如全站宕机、数据丢失等）都不是单一事件的结果，而是由多个小问题叠加导致的。
+ 如前文提到的实例，k8s集群中数据收集app的POD副本不合理调度可能最初只是影响集群工作节点的稳定，但如果不及时处理，可能会导致整个集群的不稳定甚至崩溃。
+	
+ 重视未遂事件（Near Miss）
+未遂事件是指那些没有直接影响到生产环境，但暴露了潜在问题的事件。
+ 这一点我也有话要说，请关注后续分享
+	
+ 构建“免疫系统”
+SRE的核心之一是构建可观测性和自动化的工具链，以快速发现和修复问题。通过监控和日志系统，SRE团队可以捕捉到小问题的信号，比如错误率的轻微上升、延迟的短暂波动等。这些“小信号”正是Heinrich法则中隐患的表现，及时响应是预防灾难的关键。
+ 大家有想过没有，及时响应的前提是收到通知，那如何高效地收到通知呢？
+发邮件？会被淹没在一堆邮件中，每隔5分钟检查一次邮箱也不可能；
+发即时消息？结果类似，大家有啥建议请🙋
+	
+3️⃣ 想起小时候看过宣传节能灯的公益广告：再小的支持也是一种力量！在SRE的世界里，每一次小的改进，都是对大灾难的有效预防。
+----- English
+Heinrich's Rule: Prevent Small Problems, Avoid Major Disasters
+
+Hello everyone, today let's learn about safety production theory together (with a different learning homepage image 😂), starting with Heinrich's Rule.
+
+1️⃣ Heinrich's Rule
+As shown in Figure 2, Heinrich's Rule originally comes from the industrial safety field, proposed by safety expert Herbert William Heinrich in the 1930s. It describes the pattern of accident occurrence:
+‼️‼️‼️ Behind every serious accident, there are often 29 minor accidents and 300 near misses or hazards.
+In other words, major accidents are often triggered by a series of smaller problems that accumulate or unresolved hazards. If we can identify and address these small problems in time, we can effectively prevent more serious consequences.
+
+2️⃣ In the SRE field, we are committed to providing users with a consistent service experience by improving system reliability and stability. To achieve this goal, we need not only to solve problems that have already occurred, but also to learn from potential problems and prevent them before they happen. In this process, Heinrich's Rule provides us with an extremely valuable perspective.
+
+In SRE practice, Heinrich's Rule has wide application scenarios. Although it originates from the safety field, its core idea - preventing major problems by focusing on and solving small problems - is highly aligned with SRE goals. Here are several key points:
+
+**Small Problems Accumulate to Cause Major Failures**
+In complex distributed systems, almost all major system failures (such as site-wide outages, data loss, etc.) are not the result of a single event, but are caused by the accumulation of multiple small problems.
+As mentioned in the previous example, unreasonable scheduling of data collection app POD replicas in a k8s cluster may initially only affect the stability of cluster worker nodes, but if not handled promptly, it could lead to instability or even collapse of the entire cluster.
+
+**Pay Attention to Near Miss Events**
+Near miss events refer to those events that do not directly affect the production environment but expose potential problems.
+I also have something to say about this point, please follow subsequent sharing.
+
+**Building an "Immune System"**
+One of the core aspects of SRE is building observability and automated toolchains to quickly discover and fix problems. Through monitoring and logging systems, SRE teams can capture signals of small problems, such as slight increases in error rates, brief fluctuations in latency, etc. These "small signals" are exactly the manifestation of hazards in Heinrich's Rule, and timely response is key to preventing disasters.
+Have you ever thought about it? The prerequisite for timely response is receiving notifications. So how can we efficiently receive notifications?
+Send emails? They'll be buried in a pile of emails, and checking email every 5 minutes is impossible;
+Send instant messages? The result is similar. What suggestions do you have? Please 🙋
+
+3️⃣ In the SRE world, every small improvement is an effective prevention against major disasters.
+
+Sep 21, 2025
+----- Chinese
+Kubernetes Secret 简介
+大家好，聊过安全生产法则以后，我来继续分享K8S使用过程中发生的案例 
+这是一个隐秘且很容易踩坑的案例，从介绍K8S的secret开始。
+在 K8S 中，Secret 是一种专门用于存储敏感信息（如密码、API 密钥、证书等）的资源类型。它可以帮助我们更安全地管理和使用这些数据。
+1️⃣ 为什么要用 Secret
+在管理敏感信息时，直接将这些数据存储在代码或配置文件中可能存在以下问题：
+⚠️ 安全风险：敏感信息容易明文暴露，特别是在版本控制系统（如 Git）中。
+⚠️ 缺乏灵活性：不同环境中的敏感信息可能不同，直接硬编码会导致修改困难。
+⚠️ 权限管理不足：无法有效控制哪些用户或应用可以访问这些数据。
+使用 Secret 的好处包括：
+👍 安全存储：将敏感信息与应用解耦，降低泄露风险。
+👍 权限控制：通过 Kubernetes 的 RBAC 机制，确保只有被授权的应用可以访问对应的 Secret。
+👍 动态更新：支持敏感信息的动态更新，无需重新部署应用。
+	
+2️⃣ Secret 中的值需要以 Base64 编码存储，这并不是为了加密，而是出于以下原因：
+格式兼容：Base64 可以将数据转换为只包含 ASCII 字符的字符串，确保即使是二进制数据也能安全地存储在 YAML/JSON 文件中。
+减少明文暴露：虽然不是加密手段，但 Base64 可以在一定程度上避免数据被直接识别。
+API 要求：Kubernetes 的 API 设计要求 Secret 的值以 Base64 编码形式存储。
+‼️‼️‼️ 需要注意的是，Base64 并不能真正保护数据的安全。如果需要更高的安全性，可以结合外部密钥管理系统使用。
+	
+3️⃣ 应用可以通过以下方式使用 Secret 中存储的敏感信息：
+注入环境变量，如图3所示：
+将 Secret 的值注入到 Pod 的环境变量中，应用可以通过环境变量直接读取这些数据。这种方式适合简单的配置场景。
+挂载到文件系统
+将 Secret 的值以文件形式挂载到容器内，应用可以通过读取文件来获取敏感信息。这种方式适合管理复杂或大数据量的敏感内容。
+	
+通过合理使用 Secret，可以帮助开发者更安全、高效地管理敏感信息。接下来我将具体说明案例内容以及如何修复。
+
+----- English
+
+Introduction to Kubernetes Secret
+
+Hello everyone, after discussing safety production rules, I'll continue sharing cases that occurred during K8S usage.
+This is a hidden and easily overlooked case, starting with an introduction to K8S secrets.
+
+In K8S, Secret is a resource type specifically designed for storing sensitive information (such as passwords, API keys, certificates, etc.). It helps us manage and use this data more securely.
+
+1️⃣ Why Use Secret
+
+When managing sensitive information, directly storing this data in code or configuration files may present the following problems:
+⚠️ Security risks: Sensitive information is easily exposed in plain text, especially in version control systems (like Git).
+⚠️ Lack of flexibility: Sensitive information may differ across environments, and hard-coding makes modifications difficult.
+⚠️ Insufficient permission management: Cannot effectively control which users or applications can access this data.
+
+Benefits of using Secret include:
+👍 Secure storage: Decouples sensitive information from applications, reducing exposure risks.
+👍 Permission control: Through Kubernetes' RBAC mechanism, ensures only authorized applications can access corresponding Secrets.
+👍 Dynamic updates: Supports dynamic updates of sensitive information without redeploying applications.
+
+2️⃣ Values in Secret need to be stored in Base64 encoding, which is not for encryption but for the following reasons:
+
+Format compatibility: Base64 can convert data into strings containing only ASCII characters, ensuring even binary data can be safely stored in YAML/JSON files.
+Reduce plain text exposure: While not an encryption method, Base64 can prevent data from being directly identified to some extent.
+API requirements: Kubernetes' API design requires Secret values to be stored in Base64 encoded format.
+‼️‼️‼️ It's important to note that Base64 cannot truly protect data security. If higher security is needed, it can be used in combination with external key management systems.
+
+3️⃣ Applications can use sensitive information stored in Secret through the following methods:
+
+Inject environment variables, as shown in Figure 3:
+Inject Secret values into Pod environment variables, allowing applications to directly read this data through environment variables. This method is suitable for simple configuration scenarios.
+
+Mount to file system:
+Mount Secret values as files into containers, allowing applications to obtain sensitive information by reading files. This method is suitable for managing complex or large-volume sensitive content.
+
+By properly using Secret, developers can manage sensitive information more securely and efficiently. Next, I will specifically explain the case content and how to fix it.

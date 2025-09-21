@@ -4,9 +4,49 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kubernetes Cluster Diagram</title>
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.min.js"></script>
+    <script>
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'default'
+        });
+    </script>
 </head>
 <body>
+    <div class="mermaid">
+        graph
+            subgraph K8S Cluster
+                direction LR
+                subgraph Secrets
+                    S1[Base64 encoded password]
+                end
+                subgraph Application
+                    direction TB
+                    P1[Data Collection App: POD1]
+                    P2[Data Collection App: POD2]
+                end
+                Application -- "Read encrypted content from secret through keys\n (such as username and password shown below),\n decrypt via K8S and use in application" --> Secrets
+            end
+    </div>
+    <div class="mermaid">
+        flowchart BT
+            A@{ img: "./secret.png", label: "K8S Secret Example", pos: "t", constraint: "off" }
+            B@{ img: "./pod1.png", label: "K8S Pod Deployment Referencing Secret Example", pos: "t", w: 1000, h: 700, constraint: "off" }
+            B --> A
+    </div>
+    <div class="mermaid">
+         graph
+            direction BT
+            subgraph K8S集群创建secret
+                subgraph 方式1
+                    s1[kubectl create secret generic db-credentials --from-file=username=username.txt --from-file=password=password.txt]
+                end
+                subgraph 方式2
+                    s2[kubectl create secret generic db-credentials --from-literal=username=root --from-literal=password=password]
+                end
+            end
+    </div>
+
     <div class="mermaid">
         graph
             subgraph K8S集群
@@ -27,18 +67,6 @@
             A@{ img: "./secret.png", label: "K8S Secret例子", pos: "t", constraint: "off" }    
             B@{ img: "./pod.png", label: "K8S Pod部署引用secret例子", pos: "t", w: 1000, h: 700, constraint: "off" } 
             B --> A
-    </div>
-    <div class="mermaid">
-         graph
-            direction BT
-            subgraph K8S集群创建secret
-                subgraph 方式1
-                    s1[kubectl create secret generic db-credentials --from-file=username=username.txt --from-file=password=password.txt]
-                end
-                subgraph 方式2
-                    s2[kubectl create secret generic db-credentials --from-literal=username=root --from-literal=password=password]
-                end
-            end
     </div>
 </body>
 </html>

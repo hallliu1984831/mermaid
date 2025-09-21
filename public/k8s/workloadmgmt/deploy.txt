@@ -1806,20 +1806,35 @@ kubectl get pods -n kube-system | grep controller-manager
 
 Controller Manager就像是学校里那些默默无闻但极其重要的中层管理者，他们不直接面对学生，但确保学校的各项政策能够被正确执行。如果没有它，整个宿舍管理体系就只是一堆静态的规章制度，无法自动化、智能化地运转。它是让K8S"活起来"的关键组件！没有它，K8s就只是一堆静态配置文件！
 
-章节19: K8S Scheduler：校园后勤部门
+章节19: Kubernetes Scheduler：校园后勤部门
 
-大家好！前面聊了校园总务处（API Server）和校园管理中枢（Controller Manager），今天来认识Scheduler——学校的后勤部门，专门负责给学生安排最合适的宿舍。
-
-1️⃣ 什么是Scheduler？🏠
-
-你是K8S大学新生，通过入学申请（Pod创建）后需要宿舍。学校有很多宿舍楼（Node），条件各不相同：A栋配置高但住满了，B栋有空房但网络差，C栋安静适合学习，D栋设施新但位置远。
-
-Scheduler就是帮你选择最佳宿舍的后勤部门！** 它综合考虑需求、资源情况和限制条件，安排最合适的住处。
-
-2️⃣ Scheduler的工作流程 📋
-
+大家好！前面聊了校园总务处（API Server）和校园管理中枢（Controller Manager），今天来认识Scheduler，学校的后勤部门，专门负责给学生安排最合适的宿舍。
+1️⃣ 什么是Scheduler❓
+如果你是K8S大学新生，通过入学申请（即Pod创建）后需要宿舍。学校有很多宿舍楼（Node），条件各不相同
+👉 A栋配置高但住满了
+👉 B栋有空房但网络差
+👉 C栋安静适合学习
+👉 D栋设施新但位置远。
+Scheduler就是帮你选择最佳宿舍的后勤部门！它综合考虑需求、资源情况和限制条件，安排最合适的住处。
+2️⃣ Scheduler的工作流程 
 👉 接收住宿申请
-Controller Manager创建新Pod时，Pod处于"无家可归"状态——还未分配到具体Node。
+如图3，Controller Manager创建新Pod时，Pod处于"无家可归"状态，即还未分配到具体的Worker Node。
+👉 筛选合适的宿舍楼（Filtering）
+Scheduler筛选候选Node：检查资源是否充足（CPU、内存）、存储空间、端口冲突、Node选择器要求等。就像后勤部门问："学生需要2GB内存，A栋还有吗？"
+👉 评分排序（Scoring）
+Scheduler给候选Node打分：考虑资源利用率、亲和性、数据本地性、负载均衡等因素。
+👉 最终决策
+选择得分最高的Node，通知API Server，即为Pod配置指定nodeName字段
+3️⃣ Scheduler的智能调度策略 🧠
+👉 资源感知调度：
+Scheduler避免将Pod调度到资源紧张的Node上。
+👉 亲和性调度：如业务Pod希望与数据库Pod在同一个Node
+👉 反亲和性调度：如多个Web服务器Pod不能在同一个Node，避免单点故障
+👉 污点和容忍：某些Node有"污点"（如GPU专用），只有特定Pod能"容忍"
+4️⃣ 调度失败怎么办？❌
+Scheduler遇到"无房可分"时，Pod会处于Pending状态。常见原因：资源不足、亲和性冲突、污点限制、端口冲突等。
+5️⃣ 一句话总结
+Scheduler就像是学校里最懂学生需求的后勤部门主任——它不仅要考虑宿舍楼的硬件条件，还要平衡各种复杂的人际关系和特殊要求，最终为每个学生找到最合适的"家"。没有它，Pod就只能在集群里"流浪"，永远找不到属于自己的Node！
 
 ```yaml
 apiVersion: v1
@@ -1837,86 +1852,6 @@ spec:
   # 注意：这里还没有nodeName字段
 ```
 
-👉 筛选合适的宿舍楼（Filtering）
-Scheduler筛选候选Node：检查资源是否充足（CPU、内存）、存储空间、端口冲突、Node选择器要求等。就像后勤部门问："学生需要2GB内存，A栋还有吗？"
-
-👉 评分排序（Scoring）
-Scheduler给候选Node打分：考虑资源利用率、亲和性、数据本地性、负载均衡等因素。
-
-👉 最终决策
-选择得分最高的Node，通知API Server：
-
-```yaml
-# 更新后的Pod配置
-apiVersion: v1
-kind: Pod
-metadata:
-  name: student-pod
-spec:
-  nodeName: node-b  # Scheduler的决定！
-  containers:
-  - name: student-container
-    image: nginx
-```
-
-3️⃣ Scheduler的智能调度策略 🧠
-
-👉 资源感知调度：
-Scheduler避免将Pod调度到资源紧张的Node上。
-
-👉 亲和性调度：
-```yaml
-# Pod希望与数据库Pod在同一个Node
-affinity:
-  podAffinity:
-    requiredDuringSchedulingIgnoredDuringExecution:
-    - labelSelector:
-        matchExpressions:
-        - key: app
-          operator: In
-          values:
-          - database
-      topologyKey: kubernetes.io/hostname
-```
-
-就像学生说："我想和室友住同一栋楼"。
-
-👉 反亲和性调度：
-```yaml
-# 多个Web服务器Pod不能在同一个Node
-affinity:
-  podAntiAffinity:
-    requiredDuringSchedulingIgnoredDuringExecution:
-    - labelSelector:
-        matchLabels:
-          app: web-server
-      topologyKey: kubernetes.io/hostname
-```
-
-就像："Web服务器不能住同一栋楼，避免单点故障"。
-
-4️⃣ 调度失败怎么办？❌
-
-Scheduler遇到"无房可分"时，Pod会处于Pending状态。常见原因：资源不足、亲和性冲突、污点限制、端口冲突等。
-
-## 自定义调度策略 🎯
-
-可以指定特定调度器：
-
-```yaml
-apiVersion: v1
-kind: Pod
-metadata:
-  name: special-pod
-spec:
-  schedulerName: my-custom-scheduler  # 使用自定义调度器
-  containers:
-  - name: app
-    image: nginx
-```
-
-就像说："我要VIP服务！"
-
 ## 实际操作命令 🛠️
 
 ```bash
@@ -1926,9 +1861,3 @@ kubectl get pods -n kube-system | grep scheduler
 # 查看调度事件
 kubectl get events --sort-by=.metadata.creationTimestamp
 ```
-
-## 一句话总结 🎯
-
-**Scheduler就像是学校里最懂学生需求的后勤部门主任——它不仅要考虑宿舍楼的硬件条件，还要平衡各种复杂的人际关系和特殊要求，最终为每个学生找到最合适的"家"。没有它，Pod就只能在集群里"流浪"，永远找不到属于自己的Node！**
-
-*记住：在K8s的世界里，Scheduler是那个让"居者有其屋"成为现实的幕后英雄！* 🏠✨

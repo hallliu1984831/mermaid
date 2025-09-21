@@ -10,6 +10,25 @@
     <div class="mermaid">
         flowchart BT
             %% Use tri and trap-b shapes to simulate a pyramid
+            A@{ shape: tri, label: "Severe Accidents<br>1 incident" }
+            B1@{ shape: trap-b, label: "Minor Accidents<br>29 incidents" } --> A
+            C1@{ shape: trap-b, label: "Near Misses (Dangerous Behaviors)<br>300 incidents" } --> B1
+            D1@{ shape: trap-b, label: "Safety Hazards (Potential Risk Sources)<br>1000 incidents" }  --> C1
+            
+            classDef widest fill:#f9f,stroke:#333,stroke-width:2;
+            classDef medium fill:#bbf,stroke:#333,stroke-width:2;
+            classDef small fill:#bfb,stroke:#333,stroke-width:2;
+            classDef top fill:#fbb,stroke:#333,stroke-width:2;
+
+            %% Apply style classes
+            class D1 widest
+            class C1 medium
+            class B1 small
+            class A1 top
+    </div>
+    <div class="mermaid">
+        flowchart BT
+            %% Use tri and trap-b shapes to simulate a pyramid
             A@{ shape: tri, label: "严重事故<br>1起" }
             B1@{ shape: trap-b, label: "轻微事故<br>29起" } --> A
             C1@{ shape: trap-b, label: "未遂事件(危险行为)<br>300起" } --> B1

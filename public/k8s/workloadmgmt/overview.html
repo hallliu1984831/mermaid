@@ -4,7 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kubernetes</title>
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.min.js"></script>
+    <script>
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'default'
+        });
+    </script>
 </head>
 <body>
     <div class="mermaid">
@@ -12,7 +18,7 @@
         Root((Kubernetes 学习进度))
             应用配置管理
                 ConfigMap: 已学习内容
-            自动化:
+            自动化
                 水平 Pod 自动伸缩: 已学习内容
             安全性
                 Secret: 已学习内容
@@ -23,13 +29,14 @@
                 Namespace：已学习内容
                 ResourceQuota: 已学习内容
                 LimitRange: 已学习内容
-            存储管理
-                PV/PVC: 已学习内容
-                StorageClass： 已学习内容
             集群管理
                 API Server: 已学习内容
                 静态Pod： 已学习内容
-                Controller Manager: 今日话题
+                Controller Manager: 已学习内容
+                Scheduler: 今日话题
+            存储管理
+                PV/PVC: 已学习内容
+                StorageClass： 已学习内容
     </div>
     
 
