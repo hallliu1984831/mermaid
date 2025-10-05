@@ -345,3 +345,170 @@ Mount to file system:
 Mount Secret values as files into containers, allowing applications to obtain sensitive information by reading files. This method is suitable for managing complex or large-volume sensitive content.
 
 By properly using Secret, developers can manage sensitive information more securely and efficiently. Next, I will specifically explain the case content and how to fix it.
+
+Sep 22, 2025
+----- Chinese
+Kubernetes Secret 踩坑案例
+大家好，接上篇K8S secret 简介，为了在集群中安全存储敏感数据（如用户名、密码、API 密钥等），通常使用 Secret 来进行管理。应用程序可以通过挂载文件或环境变量的方式访问 Secret 中的键值对，并根据实际情况使用这些信息。然而，Secret 的使用若出现配置不当，可能会导致应用程序运行异常。
+	
+真实案例：应用程序因 Secret 的值内容问题导致数据库连接失败。
+	
+1️⃣ 问题描述
+创建secret，用于存储数据库的连接信息。访问数据库的命令可以归纳到generic类型的secret中,有如下两种创建方法:
+1. kubectl create secret generic db-credentials --from-file=username=username.txt --from-file=password=password.txt
+     username.txt和password.txt是两个文本文件,内容分别为root,内容为password
+  
+2. kubectl create secret generic db-credentials --from-literal=username=root --from-literal=password=password
+     直接在命令行中输入用户名和密码
+  
+这两种方法创建的secret是一样的,都可以通过kubectl get secret db-credentials -o yaml查看到secret的内容
+但是第二种方法创建的secret在yaml文件中是以string类型存储的,而第一种方法创建的secret在yaml文件中是以binaryData类型存储的
+这两种方法创建的secret在使用时没有区别,都可以通过kubectl get secret db-credentials -o yaml查看到secret的内容
+
+根据应用程序的deploy yaml文件配置，pod启动时会读取Secret db-credentials中的 username 和 password 值来连接数据库。然而，在启动时，程序报错误日志如下：
+Unable to obtain connection from database (jdbc:mysql://mysqldb:3306/mysql?Unicode=true&characterEncoding=UTF-8) for user 'root': Access denied for user 'root'@'10.4.214.53' (using password: YES)
+
+	
+2️⃣ 从日志分析
+应用程序未能成功使用提供的用户名和密码连接数据库。错误提示显示，数据库拒绝了用户名 root 的访问。
+
+3️⃣ 排查过程
+检查数据库配置，首先检查了应用程序的数据库连接配置，确认数据库地址、端口、用户名和密码均正确无误。
+通过以下命令查看 Secret 的内容：“kubectl get secret db-credentials -o yaml”，发现 Secret 中的 username 和 password 字段存储的是 Base64 编码后的字符串，而不是直接存储的明文，这是预期行为。
+解码 Secret 内容 解码后发现，username 和 password 的值确实是正确的明文字符串。
+在进一步详细对比后，发现问题出现在 Secret 的创建方式 上。操作人员使用上述创建secret的方法一创建了 Secret。其中，username.txt 和 password.txt 两个文本文件是通过文本编辑器 vim 生成的，在输入内容后直接保存退出，vim 默认会在文件末尾添加一个换行符（\n）。因此，文件的真实内容分别变成了(root\n)和(password\n), Base64 编码会将换行符也视为有效字符，最终导致 Secret 中的值包含了额外的换行符。
+	
+4️⃣ 解决方法：
+直接使用以下命令生成没有换行符的文件：echo -n "password" > password.txt，重新生成secret
+使用图3的方案二创建重新secret，在命令中直接指定内容
+重启应用，问题修复
+
+----- English
+
+Kubernetes Secret Troubleshooting Case Study
+
+Hello everyone, following up on the previous K8S Secret introduction, Secrets are typically used to securely store sensitive data (such as usernames, passwords, API keys, etc.) in clusters. Applications can access key-value pairs in Secrets by mounting files or environment variables, and use this information according to actual needs. However, improper configuration of Secrets may cause application runtime exceptions.
+
+Real case: Application database connection failure due to Secret value content issues.
+
+1️⃣ Issue Description
+Creating a secret in K8S cluster to store database connection information. In general, we create generic type secret with following two methods:
+1. kubectl create secret generic db-credentials --from-file=username=username.txt --from-file=password=password.txt
+   username.txt and password.txt are two text files, with content "root" and "password" respectively
+
+2. kubectl create secret generic db-credentials --from-literal=username=root --from-literal=password=password
+   Directly input username and password in the command line
+
+These two methods create identical secrets, both can be viewed through kubectl get secret db-credentials -o yaml to see the secret content
+However, the secret created by the second method is stored as string type in the yaml file, while the secret created by the first method is stored as binaryData type in the yaml file
+There is no difference when using secrets created by these two methods, both can be viewed through kubectl get secret db-credentials -o yaml to see the secret content
+
+According to the application's deploy yaml file configuration, the pod reads the username and password values from Secret db-credentials to connect to the database during startup. However, during startup, the program reported the following error log:
+Unable to obtain connection from database (jdbc:mysql://mysqldb:3306/mysql?Unicode=true&characterEncoding=UTF-8) for user 'root': Access denied for user 'root'@'10.4.214.53' (using password: YES)
+
+2️⃣ Log Analysis
+The application failed to successfully connect to the database using the provided username and password. The error message shows that the database denied access for username 'root'.
+
+3️⃣ Troubleshooting Process
+Checking database configuration, first verified the application's database connection configuration, confirming that the database address, port, username, and password were all correct.
+Using the command "kubectl get secret db-credentials -o yaml" to view the Secret content, found that the username and password fields in the Secret store Base64 encoded strings, not direct plaintext, which is expected behavior.
+Decoding Secret content revealed that the username and password values were indeed correct plaintext strings.
+After further detailed comparison, the problem was found to be in the Secret creation method. The operator used the first method mentioned above to create the Secret. The username.txt and password.txt text files were generated using the vim text editor, and after inputting content and saving directly, vim by default adds a newline character (\n) at the end of the file. Therefore, the actual file content became (root\n) and (password\n) respectively. Base64 encoding treats the newline character as a valid character, ultimately causing the Secret values to contain extra newline characters.
+
+4️⃣ Solution:
+Directly use the following command to generate files without newline characters: echo -n "password" > password.txt, regenerate the secret
+Use the second approach mentioned in figure 3 to recreate the secret, directly specifying content in the command
+Restart the application, problem resolved
+
+Sep 23, 2025
+----- Chinese
+base64 编码简介
+大家好，今天我们来聊聊上篇提到的base64编码是个啥东东，以及它有啥用处。
+ Base64 是一种常见的编码方法，它的主要作用是将二进制数据（如图片、文件、特殊字符等）转换成文本格式，以便在需要传输或存储的场景中使用。来了解下它的作用和一些应用场景 
+	
+1️⃣ 微信聊天中的图片传输
+当你在微信或其他社交软件中发送图片时，图片实际上是以二进制形式存储的。如果直接传输二进制数据，可能会因为网络传输问题或不兼容的字符导致图片损坏。
+ 社交软件会将图片编码成 Base64 格式，将图片内容转换成一段文本（如 iVBORw0KGgoAAAANSUhEUg...）。这段文本更适合在网络上传输，确保图片可以被接收方正确解码并查看。
+2️⃣ 发电子邮件时的附件
+在发电子邮件时添加的图片、PDF、Word 文档等附件，实际上是文件的二进制数据。如果直接将这些数据嵌入邮件正文，可能会因为特殊字符（如 \0、\n 等）影响邮件的格式。
+ 邮件服务会将这些文件通过 Base64 编码，转换成可读的文本格式，嵌入到邮件内容中。例如，图片被编码成一段 Base64 文本，最终接收方可以解码还原成图片。它能确保附件不被错误解析，避免邮件内容被破坏，同时兼容不同的邮件客户端。
+3️⃣ 生成二维码
+在商场扫码付款时，手机会生成一个二维码。这些二维码其实是字符串的编码形式，可能包含你的付款信息、商户信息等。
+ 二维码中包含的字符串可能会用 Base64 进行编码，比如你的付款信息被转换成一段 Base64 文本，即将数据压缩成一种标准格式，再嵌入二维码中。便于快速读取、同时避免中文或特殊字符导致的数据错误。
+4️⃣ 上传头像到社交媒体
+有些平台会将图片编码成 Base64 格式，然后通过网络传输到服务器。这种方式可以避免网络不稳定时文件损坏。
+如果把你的文件、图片、密码想象成“二进制代码”，它们可能包含“看不懂的字符”或“特殊符号”。这些字符在传输或者保存时有时会导致问题。
+Base64 就像一个“翻译器”，把这些“看不懂的字符”翻译成由字母、数字组成的“人类友好型字符”。这让它们更容易在网络中传输、在系统中存储，且不会损坏或丢失。
+虽然我们可能察觉不到 Base64 的存在，但它背后默默地让数据传输更加稳定和安全。
+
+----- English
+
+Introduction to Base64 Encoding
+
+Hello everyone, today let's talk about what Base64 encoding is, which we mentioned in the previous article, and what it's used for.
+
+Base64 is a common encoding method whose main purpose is to convert binary data (such as images, files, special characters, etc.) into text format for use in scenarios that require transmission or storage. Let's understand its functions and some application scenarios.
+
+1️⃣ Image Transmission in WeChat Chat
+When you send images in WeChat or other social software, the images are actually stored in binary format. If binary data is transmitted directly, the images might get corrupted due to network transmission issues or incompatible characters.
+Social software will encode images into Base64 format, converting the image content into a text string (like iVBORw0KGgoAAAANSUhEUg...). This text string is more suitable for network transmission, ensuring that images can be correctly decoded and viewed by the recipient.
+
+2️⃣ Email Attachments
+When adding attachments like images, PDFs, Word documents to emails, these are actually binary data of files. If this data is directly embedded in the email body, it might affect the email format due to special characters (like \0, \n, etc.).
+Email services will encode these files through Base64, converting them into readable text format and embedding them in the email content. For example, images are encoded into Base64 text, and ultimately the recipient can decode and restore them back to images. This ensures attachments are not incorrectly parsed, prevents email content corruption, and maintains compatibility with different email clients.
+
+3️⃣ QR Code Generation
+When making payments by scanning codes in shopping malls, your phone generates a QR code. These QR codes are actually encoded forms of strings that may contain your payment information, merchant information, etc.
+The strings contained in QR codes may use Base64 encoding, for example, your payment information is converted into Base64 text, compressing the data into a standard format before embedding it in the QR code. This facilitates quick reading while avoiding data errors caused by Chinese characters or special characters.
+
+4️⃣ Uploading Avatars to Social Media
+Some platforms encode images into Base64 format and then transmit them to servers over the network. This approach can prevent file corruption when the network is unstable.
+
+If you imagine your files, images, and passwords as "binary code," they may contain "incomprehensible characters" or "special symbols." These characters sometimes cause problems during transmission or storage.
+Base64 acts like a "translator," translating these "incomprehensible characters" into "human-friendly characters" composed of letters and numbers. This makes them easier to transmit over networks and store in systems without damage or loss.
+Although we may not notice the existence of Base64, it silently makes data transmission more stable and secure behind the scenes.
+
+Sep 28,2025
+----- Chinese
+探索SRE：别让你的应用日志变成“话痨”
+大家好，今天我来分享一个生产环境遇到的问题：应用日志 DEBUG/TRACE 设置的威力
+1️⃣ 问题描述：某日，监控系统显示几台虚拟机异常：
+ CPU占用过高
+ 内存使用率过高
+ 网络带宽占用过高 （> 30 m/s）
+	
+2️⃣ 检查过程：经过检查，发现几台异常的虚拟机都部署了同一个java应用，并于同一时间进行了整体版本更新。
+检查grafana的响应指标图，发现java应用本身的jvm指标，GC状态相对正常，略微偏高
+日志系统检查，发现应用在版本更新以后，开启了DEBUG的日志设定。
+	
+3️⃣ 问题修复：把应用的日志设定改为INFO以后，虚拟机状态恢复正常
+	
+4️⃣ 关于应用日志：对于部署在生产环境中的服务，日志那可是排查问题的“福尔摩斯”，是了解应用“内心活动”的窗口。如果你的应用是个正在搬砖的码农，日志级别就像是码农向上级汇报的工作进度，请参考图2。
+从图中可以看出，日志级别从上往下，信息量是递增的。尤其是DEBUG 和 TRACE，它们简直就是日志界的“话痨”，只要能说的一股脑的都要跟你说！
+	
+5️⃣ 那么开启了DEBUG/TRACE的日志输出，到底是好是坏？请参考图3
+通常，DEBUG 级别的日志主要用于开发和测试环境。在生产环境中，为了保证应用性能、稳定性和安全性，应避免长期开启 DEBUG 级别日志。如果需要在生产环境排查特定问题，可以考虑临时、有范围地开启 DEBUG 日志，并在问题解决后及时关闭或调回更高级别（如 INFO 或 ERROR）。同时，监控系统也需要对DEBUG/TRACE的日志设置以及输出状态有一个实时的监控，可以在问题出现的第一时间介入进行检查、确认，必要时进行修改。
+
+----- English
+
+Exploring SRE: Don't Let Your Application Logs Become "Chatterboxes"
+
+Hello everyone, today I'm sharing a production environment issue I encountered: the power of application log DEBUG/TRACE settings.
+
+1️⃣ Problem Description: One day, the monitoring system showed several virtual machines with anomalies:
+- High CPU usage
+- High memory usage
+- High network bandwidth usage (> 30 MB/s)
+
+2️⃣ Investigation Process: After investigation, we found that all the abnormal virtual machines had deployed the same Java application and had undergone a complete version update at the same time.
+Checking Grafana's response metric charts, we found that the Java application's own JVM metrics and GC status were relatively normal, just slightly elevated.
+Log system inspection revealed that after the version update, the application had enabled DEBUG log settings.
+
+3️⃣ Problem Resolution: After changing the application's log setting to INFO, the virtual machine status returned to normal.
+
+4️⃣ About Application Logs: For services deployed in production environments, logs are the "Sherlock Holmes" for troubleshooting issues - they're the window into understanding the application's "inner thoughts." If your application is a developer working hard, log levels are like the developer reporting work progress to supervisors, please refer to Figure 2.
+From the chart, you can see that log levels increase in information volume from top to bottom. Especially DEBUG and TRACE - they're simply the "chatterboxes" of the logging world, telling you everything they possibly can!
+
+5️⃣ So is enabling DEBUG/TRACE log output good or bad? Please refer to Figure 3.
+Typically, DEBUG level logs are mainly used in development and testing environments. In production environments, to ensure application performance, stability, and security, long-term enabling of DEBUG level logs should be avoided. If you need to troubleshoot specific issues in production, consider temporarily and selectively enabling DEBUG logs, and promptly disable them or revert to higher levels (such as INFO or ERROR) after resolving the problem. Additionally, monitoring systems need real-time monitoring of DEBUG/TRACE log settings and output status, allowing for immediate intervention, inspection, confirmation, and necessary modifications when issues arise.
+

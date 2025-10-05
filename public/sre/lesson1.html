@@ -5,8 +5,111 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kubernetes</title>
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <style>
+        .mermaid {
+            display: block;
+            margin: 20px auto;
+            overflow: auto;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 10px;
+        }
+        body {
+            margin: 20px;
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+        }
+        h2 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+    </style>
+    <script>
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'default',
+            flowchart: {
+                useMaxWidth: false,
+                htmlLabels: true,
+                curve: 'basis',
+                padding: 20
+            },
+            themeVariables: {
+                fontSize: '14px'
+            }
+        });
+    </script>
 </head>
 <body>
+    <h2>DEBUG/TRACE Log Level Analysis</h2>
+    <div class="mermaid" style="width: 100%; height: 1000px; overflow: scroll;">
+        flowchart TD
+            id4([Log Level Set to DEBUG/TRACE])
+
+            subgraph Benefits ["✅ Benefits"]
+                D1["Detailed Problem Troubleshooting"]
+                D2["Deep Understanding of Application Behavior"]
+                D3["Development and Testing Support"]
+                D20["Quick Error Source Location"]
+            end
+
+            subgraph Drawbacks ["❌ Drawbacks"]
+                D4["Massive Log Volume"]
+                D5["High Performance Overhead"]
+                D6["Network Bandwidth Consumption"]
+                D7["Difficult to Analyze and Read"]
+                D8["Potential Security and Privacy Risks"]
+                D9["Increased Storage and Transmission Costs"]
+                D10["Impact on Application Stability"]
+            end
+
+            id4 --> Benefits
+            id4 --> Drawbacks
+
+            D1 -.-> D11["Provides fine-grained information about<br/>program execution, including variable<br/>values, code paths, etc."]
+            D2 -.-> D21["Able to track application internal<br/>state and processes, helping developers<br/>understand actual code execution."]
+            D3 -.-> D31["In development and testing phases,<br/>DEBUG logs are powerful tools for<br/>debugging code and verifying logic."]
+            D20 -.-> D211["Through detailed log information,<br/>can quickly find the specific<br/>location and cause of errors."]
+
+            D4 -.-> D41["Generates massive log data, far<br/>exceeding other levels, potentially<br/>filling up storage space rapidly."]
+            D5 -.-> D51["Log generation, formatting, and writing<br/>operations consume significant CPU<br/>and memory resources."]
+            D6 -.-> D61["If logs are sent to remote log collection<br/>systems, the enormous log volume consumes<br/>substantial network bandwidth."]
+            D7 -.-> D71["Massive logs are filled with numerous<br/>details, making manual or automated<br/>analysis difficult."]
+            D8 -.-> D81["DEBUG logs may inadvertently record<br/>sensitive information, increasing<br/>data breach risks."]
+            D9 -.-> D91["Storing and transmitting large amounts<br/>of log data requires more storage<br/>space and higher network costs."]
+            D10 -.-> D101["In resource-constrained or high-concurrency<br/>environments, excessive log output may<br/>cause performance degradation."]
+    </div>
+    <div class="mermaid" style="width: 100%; height: 600px;">
+        flowchart TD
+            id1([Log Level Classification])
+            D1@{ shape: dbl-circ, label: "FATAL" }
+            D11@{ shape: lin-rect, label: "Application cannot continue running and must stop immediately." }
+            D2@{ shape: dbl-circ, label: "ERROR" }
+            D21@{ shape: lin-rect, label: "Application encounters serious errors affecting main functions, but can still continue running." }
+            D3@{ shape: dbl-circ, label: "WARN" }
+            D31@{ shape: lin-rect, label: "Abnormal situations occur during application operation, but do not affect main functions." }
+            D4@{ shape: dbl-circ, label: "INFO" }
+            D41@{ shape: lin-rect, label: "Key information about normal application operation, usually used to record important events." }
+            D5@{ shape: dbl-circ, label: "DEBUG" }
+            D51@{ shape: lin-rect, label: "Detailed information about application operation, usually used for debugging and development phases." }
+            D6@{ shape: dbl-circ, label: "TRACE" }
+            D61@{ shape: lin-rect, label: "Extremely detailed information about application operation, usually used for in-depth debugging." }
+            id1 --> D1
+            id1 --> D2
+            id1 --> D3
+            id1 --> D4
+            id1 --> D5
+            id1 --> D6
+            D1 --> D11
+            D2 --> D21
+            D3 --> D31
+            D4 --> D41
+            D5 --> D51
+            D6 --> D61
+
+
+    </div>
     <div class="mermaid">
         flowchart LR
             id4([日志级别设置为 DEBUG/TRACE])
@@ -83,6 +186,5 @@
 
 
     </div>
-    
 </body>
 </html>

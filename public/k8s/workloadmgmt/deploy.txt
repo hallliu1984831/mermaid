@@ -1784,7 +1784,7 @@ Controller Manager的应急处理：
 4. 等待恢复：持续监控楼的状态
 
 
-### 实际的Controller Manager操作：
+#实际的Controller Manager操作：
 
 ```bash
 # 查看Controller Manager的状态
@@ -1852,7 +1852,7 @@ spec:
   # 注意：这里还没有nodeName字段
 ```
 
-## 实际操作命令 🛠️
+实际操作命令 🛠️
 
 ```bash
 # 查看调度器状态
@@ -1861,3 +1861,226 @@ kubectl get pods -n kube-system | grep scheduler
 # 查看调度事件
 kubectl get events --sort-by=.metadata.creationTimestamp
 ```
+
+章节20: Kubernetes etcd：校园档案馆
+
+大家好！今天来说说K8S大学最神秘的地方——etcd，也就是我们的"校园档案馆"！如果说API Server是总务处，那etcd就是存放所有重要文件的档案馆，没有它，整个大学就要停摆了！
+
+1️⃣ etcd是什么？
+etcd和mysql，postgres，oracle一样，是一款数据库产品，作为K8S大学的"超级档案馆" 📚，etcd存放着K8S大学的所有重要信息：学生档案（Pod信息）、宿舍分配表（Pod调度）、课程安排（Service配置）、密码本（Secret）、校规校纪（RBAC规则）等。
+它的特点：
+👉 高度机密：只有总务处（API Server）能直接访问
+👉 绝对可靠：分布式存储，多副本保证数据安全
+👉 实时同步：任何变更立即记录并同步
+👉 历史追溯：可查看任何时间点的数据状态
+
+2️⃣ etcd的特殊身份：为什么在Service中"隐身"？ 🕵️
+
+细心的同学可能发现了，运行`kubectl get svc -n kube-system`时，根本看不到etcd！这是因为：
+
+etcd是静态Pod，由kubelet（设施维护员）直接管理，不需要Service。API Server直接通过localhost:2379连接etcd。就像档案馆太重要，不能随便让人访问一样。
+```bash
+# etcd直接监听在控制节点上
+netstat -tlnp | grep 2379
+tcp  0  0  127.0.0.1:2379  0.0.0.0:*  LISTEN  1234/etcd
+
+# API Server直接连接etcd，不通过Service
+cat /etc/kubernetes/manifests/kube-apiserver.yaml | grep etcd
+--etcd-servers=https://127.0.0.1:2379
+```
+
+就像校园档案馆一样：
+只有总务处（API Server）有钥匙
+不对外开放：学生不能直接进入档案馆
+内部直通：总务处有专门通道到档案馆
+
+3️⃣ etcd的端口配置：档案馆的"两扇门" 🚪
+
+etcd有两个重要端口：
+2379端口：API Server通过这个端口读写数据（总务处专用通道）
+2380端口：多个etcd实例之间同步数据（分馆间专用通道）
+
+4️⃣ etcd的数据存储：分布式的"保险柜" 🔐
+
+etcd采用Raft算法实现分布式一致性：选出一个"馆长"处理写操作，馆长把变更同步给其他分馆，只有大多数分馆确认后数据才算保存。
+
+实际场景：
+```bash
+# 查看etcd集群状态
+ETCDCTL_API=3 etcdctl --endpoints=https://127.0.0.1:2379 \
+  --cacert=/etc/kubernetes/pki/etcd/ca.crt \
+  --cert=/etc/kubernetes/pki/etcd/server.crt \
+  --key=/etc/kubernetes/pki/etcd/server.key \
+  endpoint health
+
+# 输出：127.0.0.1:2379 is healthy: successfully committed proposal
+```
+
+5️⃣ etcd的性能特点：档案馆的"超能力" ⚡
+
+读操作：闪电般快速，大部分可从本地副本完成，无需集群共识
+写操作：安全第一，必须通过Leader，需要大多数节点确认
+
+性能优化：使用SSD存储，降低网络延迟，通常3-5个节点的奇数集群最佳
+
+6️⃣ etcd的备份与恢复：档案馆的"防灾演练" 🛡️
+
+etcd存储了集群的所有状态，一旦丢失就像档案馆失火！备份策略：
+```bash
+# 创建etcd快照
+ETCDCTL_API=3 etcdctl --endpoints=https://127.0.0.1:2379 \
+  --cacert=/etc/kubernetes/pki/etcd/ca.crt \
+  --cert=/etc/kubernetes/pki/etcd/server.crt \
+  --key=/etc/kubernetes/pki/etcd/server.key \
+  snapshot save /backup/etcd-snapshot-$(date +%Y%m%d).db
+```
+
+恢复流程：停止API Server → 恢复etcd数据 → 重启集群
+
+7️⃣ etcd监控：档案馆的"安保系统" 👮‍♂️
+
+关键监控指标：磁盘延迟、网络延迟、Leader变更频率、数据库大小
+
+告警场景：
+```bash
+# 磁盘延迟过高
+etcd_disk_wal_fsync_duration_seconds > 0.1
+
+# Leader频繁变更
+rate(etcd_server_leader_changes_seen_total[1h]) > 3
+
+# 数据库过大
+etcd_mvcc_db_total_size_in_bytes > 8GB
+```
+
+一句话总结 🎯
+
+etcd就像K8S大学的超级档案馆——它默默地存储着集群的所有秘密，虽然你在Service中看不到它，但它却是整个大学正常运转的基石。没有etcd，就没有K8S；保护好etcd，就是保护好整个集群的灵魂！
+
+*记住：在K8s的世界里，etcd不仅是数据存储，更是集群状态的唯一真相来源！* 📚✨
+
+章节21: Cloud Controller Manager：校园云服务部门 ☁️
+
+大家好！之前我们认识了K8S大学的各个机构，今天我们把目光从校内转向校外，来认识Cloud Controller Manager——学校的宣传处，专门负责与外部云平台对接的"外交官"。
+
+1️⃣ 什么是Cloud Controller Manager❓
+
+想象K8S大学决定"上云"——把服务外包给云服务商：宿舍楼租用阿里云虚拟机，网络使用云厂商负载均衡器，存储放在云盘中。
+
+Cloud Controller Manager就是学校的宣传处，即"云服务部门"，负责与云厂商打交道，把校园需求转化为云服务配置。
+
+2️⃣ 为什么需要它？🤔
+
+本地集群只能提供基础设施，云平台作为扩展提供了更多能力：负载均衡器、云存储、网络安全等。
+
+传统Controller Manager不懂云平台API。当学生申请LoadBalancer服务时：
+👉 **本地集群**：Service永远显示`<pending>`
+👉 **云平台**：有SLB，但不知道K8s要什么配置
+
+Cloud Controller Manager就像宣传处主任，把校园需求翻译成云平台"方言"，让K8s享受云服务的便利。
+
+3️⃣ 核心控制器 🎯
+
+**Node Controller（宿舍楼管理员）**：
+监控云主机状态，当云主机挂掉时，标记Node为NotReady，触发Pod重新调度。
+
+**Route Controller（网络管理员）**：
+管理云平台路由表，确保不同Node间Pod互通：
+```bash
+10.244.1.0/24 -> cloud-node-1
+10.244.2.0/24 -> cloud-node-2
+```
+
+**Service Controller（对外服务管理员）**：
+最重要的控制器，负责创建云负载均衡器：
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-app
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 80
+  selector:
+    app: my-app
+```
+自动调用云平台API创建负载均衡器，配置后端服务器组，返回外部IP。
+
+4️⃣ 多云适配 🌍
+
+每个云厂商API不同，Cloud Controller Manager需要适配：
+- **阿里云**：创建SLB负载均衡器
+- **腾讯云**：创建CLB负载均衡器
+- **AWS**：创建ELB负载均衡器
+
+就像多语言专家，流利地与各种云平台"对话"。
+
+5️⃣ 架构对比 🏗️
+
+**传统架构**：Controller Manager包含所有控制器
+**云原生架构**：分离出Cloud Controller Manager专门处理云平台对接
+
+```
+Controller Manager     Cloud Controller Manager
+├─ Deployment Ctrl     ├─ Node Controller
+├─ ReplicaSet Ctrl     ├─ Service Controller
+└─ Job Controller      └─ Route Controller
+```
+
+6️⃣ 实际场景：发布网站 🚀
+
+学生社团申请LoadBalancer服务：
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: club-website
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 80
+  selector:
+    app: club-website
+```
+
+**本地集群限制**：无法获取公网IP，因为家庭/企业网络只有1个路由器公网IP，无负载均衡器资源。
+
+**云平台优势**：Cloud Controller Manager工作流程：
+👉 检测到LoadBalancer服务 → 调用云平台API创建负载均衡器 → 分配独立公网IP：47.96.123.45
+
+**结果**：
+```bash
+kubectl get service club-website
+NAME           TYPE           EXTERNAL-IP    PORT(S)
+club-website   LoadBalancer   47.96.123.45   80:30080/TCP
+```
+
+7️⃣ 故障处理 ⚠️
+
+**云主机宕机**：Node Controller自动标记NotReady，Pod重新调度，流量切换，用户无感知。
+
+**负载均衡器创建失败**：Service显示`<pending>`状态，查看日志排查配额、权限等问题。
+
+8️⃣ 云平台使用限制 💰
+
+**计时收费模式**：
+👉 **负载均衡器**：按小时计费，即使没有流量也收费
+👉 **公网IP**：闲置IP也要付费，删除Service要及时释放
+👉 **流量费用**：公网出流量按GB计费
+
+**成本控制建议**：
+- 开发环境使用NodePort，生产环境才用LoadBalancer
+- 及时清理不用的Service，避免资源浪费
+- 监控云账单，设置费用告警
+
+**权限和配额限制**：
+- Cloud Controller Manager需要云平台API权限
+- 负载均衡器数量受配额限制
+- 不同地域资源可用性不同
+
+一句话总结 🎯
+
+Cloud Controller Manager就像是K8S大学的宣传处主任——它精通各种云平台的"语言"，能够把校园内的需求无缝转化为云服务的配置。有了它，K8s集群才能真正享受到云计算的弹性和便利，但也要注意控制成本！
+
+*记住：在云原生时代，Cloud Controller Manager不仅是K8s与云平台的桥梁，更是让应用真正"飞上云端"的关键推手！* ☁️✨

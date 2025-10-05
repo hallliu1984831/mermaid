@@ -10,6 +10,28 @@
     <div class="mermaid">
         graph LR
             direction TB
+            subgraph ServiceFlow ["Service Call Flow"]
+                subgraph ClientSide ["Client Side"]
+                    direction BT
+                    A["Web Browser"]
+                    B["Mobile App"]
+                    C["Service Calling Other Microservices"]
+                end
+
+                subgraph ServerSide ["Server Side"]
+                    direction BT
+                    D["Web Server"]
+                    E["API Gateway"]
+                    F["Database Server"]
+                end
+
+                ClientSide -->|Send Request| ServerSide
+                ServerSide -->|Return Response| ClientSide
+            end
+    </div>
+    <div class="mermaid">
+        graph LR
+            direction TB
             subgraph 服务调用流程
                 %% Define MasterNodes as a vertical subgraph
                 subgraph 客户端

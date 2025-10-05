@@ -9,6 +9,41 @@
 <body>
     <div class="mermaid">
         flowchart LR
+            id1([Murphy's Law: Anything that can go wrong will go wrong.]) --> A
+            A@{ shape: comment, label: "Emphasizes the fragility in system design and operations, reminding engineers to consider worst-case scenarios during design and operations, avoiding wishful thinking." }
+            id2([Todd's Law: If a problem occurs repeatedly, it's not a problem but a system feature.]) --> B
+            B@{ shape: comment, label: "Don't treat recurring problems as isolated incidents, but seek root causes at the system level." }
+            id3([Rust's Law: System complexity is inversely proportional to the ability to maintain that system.]) --> C
+            C@{ shape: comment, label: "The more complex the system, the harder it is to maintain and ensure its reliability." }
+            id4([Three Don'ts / Three Don't Leaves Rules])
+            D1@{ shape: brace-r, label: "Don't change during business peak hours" }
+            D2@{ shape: brace-r, label: "Don't change when running stably" }
+            D3@{ shape: brace-r, label: "Don't change without backup plan" }
+            D11@{ shape: lin-rect, label: "Meaning: During network traffic peak periods (such as daytime work hours or active evening user periods), do not perform operations that may affect business, including configuration changes, equipment upgrades, or restarts.\nReason: Operating network equipment during peak hours carries higher risks, and problems may impact users.\nPractice: Choose to perform maintenance during business low periods (such as late night or early morning)." }
+            D21@{ shape: lin-rect, label: "Meaning: For equipment or configurations that are running well, do not easily change or upgrade them.\nReason: Any change may introduce new risks or problems, especially when running stably.\nPractice:遵循“'if it's not broken, don't fix it'”to ensure system stability." }
+            D31@{ shape: lin-rect, label: "Meaning: Do not make changes to core equipment or configurations without establishing a comprehensive emergency backup plan.\nReason: If the change operation fails, the backup plan is the key guarantee for service recovery.\nPractice: Make data backups before each change and develop detailed rollback plans." }
+            D1 --> id4
+            D11 --> D1
+            D2 --> id4 
+            D21 --> D2
+            D3 --> id4
+            D31 --> D3
+            D4@{ shape: comment, label: "Don't leave without checking after changes" }
+            D5@{ shape: comment, label: "Don't leave without clearing alerts" }
+            D6@{ shape: comment, label: "Don't leave without investigating anomalies" }
+            D41@{ shape: lin-rect, label: "Meaning: After making changes to network equipment or configurations, comprehensive inspection and verification must be performed.\nReason: Changes may introduce new problems or affect existing functions, inspection is key to ensuring normal system operation.\nPractice: Use monitoring tools and log analysis to ensure all services are normal." }
+            D51@{ shape: lin-rect, label: "Meaning: After discovering alerts in network equipment or systems, they must be processed and cleared promptly.\nReason: Unprocessed alerts may lead to system performance degradation or potential failures.\nPractice: Establish alert handling processes to ensure all alerts receive timely response." }
+            D61@{ shape: lin-rect, label: "Meaning: After discovering system anomalies, thorough investigation and analysis must be conducted.\nReason: Uninvestigated anomalies may lead to system instability or potential security risks.\nPractice: Use log analysis and troubleshooting tools to ensure all anomalies are handled." }
+            id4 --> D4
+            id4 --> D5
+            id4 --> D6
+            D4 --> D41
+            D5 --> D51  
+            D6 --> D61
+    </div>
+
+    <div class="mermaid">
+        flowchart LR
             id1([墨菲定律：凡是可能出错的事，终将出错。]) --> A
             A@{ shape: comment, label: "强调了系统设计和运营中的脆弱性，提醒工程师在设计和运维过程中考虑最坏的情况，避免侥幸心理。" } 
             id2([托德定律：如果一个问题多次重复发生，它就不是一个问题，而是一个系统特性。]) --> B
