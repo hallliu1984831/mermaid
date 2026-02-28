@@ -645,47 +645,47 @@ mountOptions:
 
 #### Step 4: Create PVC and Use It
 ```yaml
-# PVC
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: s3-storage-pvc
-spec:
-  accessModes:
-    - ReadWriteMany      # S3 supports multiple Pod access
-  resources:
-    requests:
-      storage: 100Gi     # Logical capacity
-  storageClassName: s3-storage
+  # PVC
+  apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    name: s3-storage-pvc
+  spec:
+    accessModes:
+      - ReadWriteMany      # S3 supports multiple Pod access
+    resources:
+      requests:
+        storage: 100Gi     # Logical capacity
+    storageClassName: s3-storage
 
----
-# Application Pod
-apiVersion: v1
-kind: Pod
-metadata:
-  name: s3-app-pod
-spec:
-  containers:
-  - name: app
-    image: nginx
-    volumeMounts:
+  ---
+  # Application Pod
+  apiVersion: v1
+  kind: Pod
+  metadata:
+    name: s3-app-pod
+  spec:
+    containers:
+    - name: app
+      image: nginx
+      volumeMounts:
+      - name: s3-data
+        mountPath: /data
+      env:
+      - name: AWS_ACCESS_KEY_ID
+        valueFrom:
+          secretKeyRef:
+            name: aws-secret
+            key: key_id
+      - name: AWS_SECRET_ACCESS_KEY
+        valueFrom:
+          secretKeyRef:
+            name: aws-secret
+            key: access_key
+    volumes:
     - name: s3-data
-      mountPath: /data
-    env:
-    - name: AWS_ACCESS_KEY_ID
-      valueFrom:
-        secretKeyRef:
-          name: aws-secret
-          key: key_id
-    - name: AWS_SECRET_ACCESS_KEY
-      valueFrom:
-        secretKeyRef:
-          name: aws-secret
-          key: access_key
-  volumes:
-  - name: s3-data
-    persistentVolumeClaim:
-      claimName: s3-storage-pvc
+      persistentVolumeClaim:
+        claimName: s3-storage-pvc
 ```
 
 ### 🔍 Verification and Testing

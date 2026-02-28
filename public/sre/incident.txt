@@ -441,6 +441,7 @@ Now you should understand where SRE alerts come from! Besides proactive monitori
 
 
 章节5:
+----- Chinese
 探索SRE产线事故:存储引发的“删库跑路”
 
 大家好！前面聊了NOC和事故复盘，今天作为一名SRE，来分享一个让我至今想起来还"心有余悸"的真实故障：StorageClass默认回收策略导致的数据丢失事件。这个故障让我深刻体会到了什么叫"默认配置是魔鬼"。
@@ -485,7 +486,77 @@ kubectl cp ./grafana-backup.tar.gz grafana-pod:/tmp/grafana-backup.tar.gz
 kubectl exec -it grafana-pod -- tar -xzf /tmp/grafana-backup.tar.gz -C /var/lib/grafana
 ```
 
+----- English
+
+Exploring SRE Production Incidents: Storage-Induced Data Loss Disaster
+
+Hello everyone! After discussing NOC and post-incident reviews, today as an SRE, I'm sharing a real incident that still haunts me - a data loss event caused by StorageClass default reclaim policy. This incident taught me what "default configurations are dangerous" truly means.
+
+1️⃣ Incident Background: The Seemingly Harmless "Cleanup" Operation
+On a normal weekday afternoon, I was cleaning up unused resources in the K8s cluster. I spotted what appeared to be an unused PVC and decided to delete it. I quickly copied the PVC name, executed the delete command, and hit enter ⚡️
+
+2️⃣ Incident Escalation: The Domino Effect
+The delete command executed successfully. When I checked the status of all PVCs, I discovered the deleted PVC was stuck in "Terminating" state. Even worse, I had copied the wrong PVC name - I had selected the one above my target: the PVC that Grafana was actively using 😭
+
+3️⃣ Problem Discovery: SRE's "Cardiac Arrest" Moment
+Seeing the mistakenly deleted PVC in terminating state, my inner monologue:
+👉 We're in trouble! Why didn't I double-check after typing the command?! How do we recover???
+
+4️⃣ Impact Analysis
+After the initial panic, I quickly calmed down and started analyzing the situation. I quickly assessed the following:
+👉 The PVC is stuck in terminating state because the Grafana Pod is still using it
+👉 If the Grafana pod restarts, this PVC will be permanently deleted. Since it was created using StorageClass with a Delete reclaim policy, when the PVC is deleted, the underlying PV will also be deleted, meaning all Grafana data will be lost.
+👉 Grafana will fail to start because the required PVC no longer exists
+At this moment, Grafana was still functioning normally, but this was just the calm before the storm - completely unreliable! ☠️
+```yaml
+# Dangerous default StorageClass configuration
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: fast-ssd
+provisioner: kubernetes.io/aws-ebs
+parameters:
+  type: gp2
+reclaimPolicy: Delete  # ⚠️ Dangerous! Data will be lost when PVC is deleted
+allowVolumeExpansion: true
+
+# Safe StorageClass configuration for production
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: safe-ssd
+provisioner: kubernetes.io/aws-ebs
+parameters:
+  type: gp2
+reclaimPolicy: Retain  # ✅ Safe! Data preserved even when PVC is deleted
+allowVolumeExpansion: true
+```
+
+5️⃣ Emergency Rescue: Climbing Out of the Pit Myself
+👉 Notified the team about the misoperation and reported the recovery steps (including Grafana restart). There goes my KPI 😭
+👉 While the PVC was still usable, quickly backed up the data - this was the lifeline!
+👉 Restarted the Grafana pod, new pod became pending, indicating the dependent PVC doesn't exist
+👉 Created a new PVC with the same name as the mistakenly deleted one
+👉 New pod started successfully, then imported the backed-up Grafana data
+👉 Checked Grafana's metrics to ensure recovery
+
+6️⃣ Lessons Learned
+👉 Always double-check resource names before deletion - verify twice, delete once
+👉 StorageClass default Delete policy is a hidden danger - should be changed to Retain for production
+👉 Backup is SRE's lifeline - never assume "nothing will go wrong"!
+
+```bash
+# Backup commands
+kubectl exec -it grafana-pod -- tar -czf /tmp/grafana-backup.tar.gz /var/lib/grafana
+kubectl cp grafana-pod:/tmp/grafana-backup.tar.gz ./grafana-backup.tar.gz
+
+# Recovery commands
+kubectl cp ./grafana-backup.tar.gz grafana-pod:/tmp/grafana-backup.tar.gz
+kubectl exec -it grafana-pod -- tar -xzf /tmp/grafana-backup.tar.gz -C /var/lib/grafana
+```
+
 章节6:
+----- Chinese
 探索SRE产线事故: API Server拒绝访问
 大家好！前面聊了PV/PVC的删库跑路故障，今天来分享另一个真实发生的生产事故：API Server证书过期导致的集群管理失控事件。这个故障让我深刻体会到了什么叫"一张证书让你失去整个集群的控制权"。
 1️⃣ 事故发生：
@@ -530,13 +601,71 @@ API Server的客户端证书过期了！
 📖 这次故障让我深刻认识到：证书过期就像一颗"定时炸弹"，平时看不出问题，一旦爆炸就让你失去集群控制权！虽然 Pod 及其服务还在正常运行，用户服务不受影响，但作为SRE却无法管理集群！
 在K8s的世界里，证书不是装饰品，而是控制权的"钥匙"！🔑
 
+----- English
+
+Exploring SRE Production Incidents: API Server Access Denied
+
+Hello everyone! After discussing the PV/PVC data loss incident, today I'm sharing another real production incident: API Server certificate expiration causing complete cluster management failure. This incident taught me what "a single certificate can bring down an entire cluster" truly means.
+
+1️⃣ Incident Occurrence:
+On what seemed like a peaceful weekday morning, bad news suddenly started flooding our work chat: "Why is CI/CD completely down?", "kubectl can't connect to the cluster!", "What happened?"
+My first reaction: "Is it a network issue?"
+The harsh reality: Much worse than a network problem...
+
+2️⃣ Fault Investigation:
+⚡️ All CI/CD pipelines failed, unable to connect to K8s cluster
+⚡️ kubectl commands returned "unable to connect to server" errors
+⚡️ API Server was completely inaccessible
+⚡️ Found certificate expiration in error logs (x509: certificate has expired or is not valid yet) - my heart sank
+Inner monologue: We're in trouble, there goes my KPI 😭
+
+3️⃣ Root Cause Analysis:
+The API Server's client certificate had expired!
+Failure chain: Certificate expiration → API Server rejects connections → kubectl fails → CI/CD interrupted → Complete loss of cluster control
+It's like an employee's ID badge expiring and security refusing building access:
+👉 Employees can't enter offices (kubectl fails)
+👉 Managers can't reach the control room (kubelet disconnected)
+👉 The entire management system falls into chaos
+
+4️⃣ Business Impact:
+👉 Complete loss of cluster observability
+👉 Unable to perform any management operations
+👉 CI/CD pipelines interrupted, preventing service updates
+Along with assessing the business impact, an unavoidable question arose: Why was there no alert before the certificate expired?
+
+5️⃣ Problem Resolution:
+👉 Confirmed certificate expiration as root cause
+👉 Generated new client certificates
+👉 Updated API Server configuration and restarted services
+👉 Restored kubectl connectivity within 30 minutes
+👉 Notified all teams that normal operations were restored
+
+6️⃣ Improvement Measures:
+👉 Set up automatic alerts for certificate expiration at 30 days, 7 days, and 1 day before expiry
+👉 Establish standard operating procedures (SOP) for certificate management
+👉 Include certificate checks in daily inspection checklists
+👉 Implement automatic certificate renewal mechanism (optional, depending on actual circumstances)
+
+📖 This incident taught me a valuable lesson: Certificate expiration is like a "time bomb" - everything appears normal until it explodes and you lose all cluster control! Although Pods and services continued running normally and user services were unaffected, as an SRE I was completely locked out of cluster management!
+In the K8s world, certificates aren't just configuration files - they're the "keys to the kingdom"! 🔑
+
+
 章节7:
+----- Chinese
 探索SRE产线事故: VIM命令的威力
 
 大家好！前面聊了各种生产环境的故障，今天来分享一个让我"社死"的低级错误：一个看似无害的vim命令，是如何把整个VM送上西天的。
 
 1️⃣ 故障背景：磁盘告警
 那是一个风和日丽的下午，我收到了来自NOC的告警：某台VM的磁盘占用率到了85%！这个故事就这样波澜不惊的开始了😂
+
+当时的我心想："又是一个常规的磁盘清理任务，应该很快就能搞定。"毕竟这种告警在生产环境中太常见了：
+- 日志文件堆积
+- 临时文件未清理
+- 应用缓存过大
+- 数据库备份占用空间
+
+按照以往的经验，这类问题通常15分钟内就能解决。然而，命运的齿轮已经开始转动...
 
 2️⃣ 磁盘检查：
 按部就班检查Grafana图表并登录VM，各项检查正常：60G磁盘，跑着Tomcat应用，仅仅磁盘使用过大
@@ -556,6 +685,7 @@ du -sh /var/log/* | sort -hr
 👉 应用日志输出没有控制
 👉 日志轮转配置失效
 此时的我，信心满满："小case，看看日志内容，找出问题根源！"
+然而，我犯了一个致命的错误——低估了40G文件对系统的冲击...
 
 4️⃣ 致命操作：vim的"死亡翻滚" 💀
 下意识地输入VIM、指定日志文件，回车走起，熟悉的日志内容窗口并没有出现，感觉不对劲了：
@@ -564,11 +694,16 @@ du -sh /var/log/* | sort -hr
 👉 创建临时文件、交换文件、缓存文件...
 👉 几分钟后，磁盘空间彻底耗尽
 
+我这时才意识到：vim处理大文件时会创建与原文件大小相当的临时文件！40G的日志文件意味着vim可能需要额外的40G空间，而我只有9G的剩余空间...
+
 5️⃣ 故障爆发：磁盘空间耗尽后的VM的"全面崩溃" 💥
 👉 无法创建新文件，系统服务异常
 👉 Tomcat无法写入日志，开始报错
 👉 应用无法创建临时文件
 👉 SSH连接变得极其缓慢
+👉 VM的监控各种告警变着法子接连出现
+
+此时的我："完了，我可怜的KPI...为什么要用vim打开40G的文件？为什么不先用tail看一下？"
 👉 VM的监控各种告警变着法子接连出现
 
 此时的我："完了，我可怜的KPI...为什么要用vim打开40G的文件？为什么不先用tail看一下？"
@@ -626,6 +761,107 @@ less /var/log/tomcat/catalina.out
 搜索特定内容
 grep "ERROR" /var/log/tomcat/catalina.out | tail -20
 ```
+----- English
+
+Exploring SRE Production Incidents: The Power of VIM Commands
+
+Hello everyone! After discussing various production environment failures, today I'm sharing an embarrassing rookie mistake: how a seemingly harmless vim command brought down an entire VM.
+
+1️⃣ Incident Background: Disk Alert
+It was a peaceful afternoon when I received an alert from NOC: disk usage on a VM had reached 85%! This story began innocently enough 😂
+
+2️⃣ Disk Investigation:
+Following standard procedures, I checked Grafana charts and logged into the VM. Everything appeared normal: 60GB disk, running Tomcat application, just elevated disk usage.
+
+3️⃣ Problem Discovery: The Log File's "Path to Bloat" 📈
+
+```bash
+df -h
+# /dev/sda1    60G   51G  9G  85%   /
+
+du -sh /var/log/* | sort -hr
+# 40G    /var/log/tomcat/catalina.out
+```
+
+Seeing this result: "Wow, a 40GB log file!" The problem seemed obvious:
+👉 Log file needs cleanup
+👉 Application log output is uncontrolled
+👉 Log rotation configuration has failed
+
+At this moment, I was confident: "Simple fix, let me check the log content to find the root cause!"
+
+4️⃣ Fatal Operation: VIM's "Death Spiral" 💀
+Instinctively, I typed vim, specified the log file, and hit enter. The familiar log content window didn't appear - something was wrong:
+👉 vim started loading the 40GB file
+👉 System desperately consumed the remaining 9GB disk space
+👉 Creating temporary files, swap files, cache files...
+👉 Within minutes, disk space was completely exhausted
+
+5️⃣ Incident Escalation: VM's "Complete Meltdown" After Disk Exhaustion 💥
+👉 Unable to create new files, system services began failing
+👉 Tomcat couldn't write logs, started throwing errors
+👉 Application couldn't create temporary files
+👉 SSH connections became painfully slow
+👉 VM monitoring alerts started cascading
+
+At this moment: "I'm in trouble, there goes my KPI... Why did I use vim on a 40GB file? Why didn't I use tail first?"
+
+6️⃣ Emergency Response: Pulling Myself Out Again 🆘
+👉 Notified team and NOC that I caused trouble 😅😭
+👉 Force quit vim
+👉 Delete vim temporary files
+👉 Backup and truncate log file
+👉 Restart services
+
+Emergency handling steps:
+```bash
+# 1. Force quit vim
+ps aux | grep vim
+kill -9 [vim process ID]
+
+# 2. Delete vim temporary files
+rm -f /tmp/.catalina.out.swp
+rm -f /var/tmp/vi.recover.*
+
+# 3. Backup and truncate log file
+tail -10000 /var/log/tomcat/catalina.out > /tmp/catalina_backup.log
+truncate -s 0 /var/log/tomcat/catalina.out
+
+# 4. Restart services
+systemctl restart tomcat
+```
+
+7️⃣ Post-Incident Review: Learning from Failure
+Incident chain: Missing log configuration → Unlimited file growth → Poor operational habits → vim requires massive temporary space → Disk exhaustion → System failure
+
+VIM's resource consumption pattern:
+👉 Creates swap files (.swp)
+👉 Creates backup files and undo history
+👉 Requires substantial disk space for large files
+
+8️⃣ Improvement Measures: From "Making Mistakes" to "Preventing Them" 🛡️
+👉 Configure logrotate to limit individual file sizes
+👉 Set appropriate log levels and output formats
+👉 Use less, tail, head commands for large file viewing
+👉 Check available disk space before operations
+👉 Exercise extra caution with large file operations
+
+This incident taught me a valuable lesson: sometimes the most critical issues aren't complex architectural problems, but seemingly familiar everyday commands!
+
+Remember: Every tool has limits, every operation needs consideration!
+
+Correct Ways to View Large Files:
+```bash
+# View file tail
+tail -100 /var/log/tomcat/catalina.out
+
+# Paginated viewing (recommended)
+less /var/log/tomcat/catalina.out
+
+# Search specific content
+grep "ERROR" /var/log/tomcat/catalina.out | tail -20
+```
+
 
 章节8:
 ----- Chinese

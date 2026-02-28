@@ -53,5 +53,20 @@
 
             end
     </div>
+
+    <div class="mermaid">
+      graph TB
+        A[TPS/QPS<br/>Throughput]
+        B[RTT<br/>Response Time]
+        C[IOPS<br/>Storage Performance]
+
+        A <--> B
+        B <--> C
+        C <--> A
+
+        style A fill:#e1f5fe,stroke:#01579b,stroke-width:2px
+        style B fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
+        style C fill:#e8f5e8,stroke:#1b5e20,stroke-width:2px
+    </div>
 </body>
 </html>

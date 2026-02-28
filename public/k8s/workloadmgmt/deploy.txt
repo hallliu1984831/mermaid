@@ -1974,24 +1974,24 @@ Cloud Controller Manager就是学校的宣传处，即"云服务部门"，负责
 本地集群只能提供基础设施，云平台作为扩展提供了更多能力：负载均衡器、云存储、网络安全等。
 
 传统Controller Manager不懂云平台API。当学生申请LoadBalancer服务时：
-👉 **本地集群**：Service永远显示`<pending>`
-👉 **云平台**：有SLB，但不知道K8s要什么配置
+👉 本地集群：Service永远显示`<pending>`
+👉 云平台：有SLB，但不知道K8s要什么配置
 
 Cloud Controller Manager就像宣传处主任，把校园需求翻译成云平台"方言"，让K8s享受云服务的便利。
 
 3️⃣ 核心控制器 🎯
 
-**Node Controller（宿舍楼管理员）**：
+Node Controller（宿舍楼管理员）：
 监控云主机状态，当云主机挂掉时，标记Node为NotReady，触发Pod重新调度。
 
-**Route Controller（网络管理员）**：
+Route Controller（网络管理员）：
 管理云平台路由表，确保不同Node间Pod互通：
 ```bash
 10.244.1.0/24 -> cloud-node-1
 10.244.2.0/24 -> cloud-node-2
 ```
 
-**Service Controller（对外服务管理员）**：
+Service Controller（对外服务管理员）：
 最重要的控制器，负责创建云负载均衡器：
 ```yaml
 apiVersion: v1
@@ -2010,16 +2010,16 @@ spec:
 4️⃣ 多云适配 🌍
 
 每个云厂商API不同，Cloud Controller Manager需要适配：
-- **阿里云**：创建SLB负载均衡器
-- **腾讯云**：创建CLB负载均衡器
-- **AWS**：创建ELB负载均衡器
+- 阿里云：创建SLB负载均衡器
+- 腾讯云：创建CLB负载均衡器
+- AWS：创建ELB负载均衡器
 
 就像多语言专家，流利地与各种云平台"对话"。
 
 5️⃣ 架构对比 🏗️
 
-**传统架构**：Controller Manager包含所有控制器
-**云原生架构**：分离出Cloud Controller Manager专门处理云平台对接
+传统架构：Controller Manager包含所有控制器
+云原生架构：分离出Cloud Controller Manager专门处理云平台对接
 
 ```
 Controller Manager     Cloud Controller Manager
@@ -2044,12 +2044,12 @@ spec:
     app: club-website
 ```
 
-**本地集群限制**：无法获取公网IP，因为家庭/企业网络只有1个路由器公网IP，无负载均衡器资源。
+本地集群限制：无法获取公网IP，因为家庭/企业网络只有1个路由器公网IP，无负载均衡器资源。
 
-**云平台优势**：Cloud Controller Manager工作流程：
+云平台优势：Cloud Controller Manager工作流程：
 👉 检测到LoadBalancer服务 → 调用云平台API创建负载均衡器 → 分配独立公网IP：47.96.123.45
 
-**结果**：
+结果：
 ```bash
 kubectl get service club-website
 NAME           TYPE           EXTERNAL-IP    PORT(S)
@@ -2058,23 +2058,23 @@ club-website   LoadBalancer   47.96.123.45   80:30080/TCP
 
 7️⃣ 故障处理 ⚠️
 
-**云主机宕机**：Node Controller自动标记NotReady，Pod重新调度，流量切换，用户无感知。
+云主机宕机：Node Controller自动标记NotReady，Pod重新调度，流量切换，用户无感知。
 
-**负载均衡器创建失败**：Service显示`<pending>`状态，查看日志排查配额、权限等问题。
+负载均衡器创建失败：Service显示`<pending>`状态，查看日志排查配额、权限等问题。
 
 8️⃣ 云平台使用限制 💰
 
-**计时收费模式**：
-👉 **负载均衡器**：按小时计费，即使没有流量也收费
-👉 **公网IP**：闲置IP也要付费，删除Service要及时释放
-👉 **流量费用**：公网出流量按GB计费
+计时收费模式：
+👉 负载均衡器：按小时计费，即使没有流量也收费
+👉 公网IP：闲置IP也要付费，删除Service要及时释放
+👉 流量费用：公网出流量按GB计费
 
-**成本控制建议**：
+成本控制建议：
 - 开发环境使用NodePort，生产环境才用LoadBalancer
 - 及时清理不用的Service，避免资源浪费
 - 监控云账单，设置费用告警
 
-**权限和配额限制**：
+权限和配额限制：
 - Cloud Controller Manager需要云平台API权限
 - 负载均衡器数量受配额限制
 - 不同地域资源可用性不同
@@ -2084,3 +2084,474 @@ club-website   LoadBalancer   47.96.123.45   80:30080/TCP
 Cloud Controller Manager就像是K8S大学的宣传处主任——它精通各种云平台的"语言"，能够把校园内的需求无缝转化为云服务的配置。有了它，K8s集群才能真正享受到云计算的弹性和便利，但也要注意控制成本！
 
 *记住：在云原生时代，Cloud Controller Manager不仅是K8s与云平台的桥梁，更是让应用真正"飞上云端"的关键推手！* ☁️✨
+
+章节22: 
+----- Chinese
+kubelet基础篇：K8S大学勤劳的设施维护员 🔧
+大家好！前面我们认识了K8S大学的各个管理部门，今天来认识一个默默无闻但极其重要的角色：kubelet，作为学校里那些勤劳的设施维护员，它们负责每栋宿舍楼的日常运营和维护。
+
+1️⃣ 什么是kubelet❓
+想象一下，K8S大学有很多栋宿舍楼（Worker Node），每栋楼都需要一个专职的设施维护员来管理：
+👉 检查宿舍状态：哪些房间有人住，哪些空着
+👉 维护基础设施：水电网络、空调暖气是否正常
+👉 执行管理指令：总务处下达的各种任务
+👉 上报楼栋情况：定期向总务处汇报楼栋状态
+kubelet就是这样的设施维护员，运行在每个Worker Node上，负责该Node的Pod生命周期管理。
+
+2️⃣ kubelet的核心职责和工作流程 🎯
+Pod生命周期管理（宿舍房间管理）
+在收到 API Server 总务处创建pod的指令以后：
+```yaml
+# 总务处下发住宿安排
+apiVersion: v1
+kind: Pod
+metadata:
+  name: student-k8s
+spec:
+  containers:
+  - name: student
+    image: college-student:v1.0
+    resources:
+      requests:
+        memory: "1Gi"
+        cpu: "0.5"
+```
+1. 接收任务
+- 从API Server获取Pod规格
+- 检查本地是否已有该Pod
+- 对比期望状态和实际状态
+
+2. 执行任务（如果需要创建新Pod）
+- 拉取容器镜像 (准备生活用品)
+- 创建Pod沙箱 (分配房间)
+- 启动Init容器 (房间预处理)
+- 启动主容器 (学生入住)
+- 配置网络和存储 (接通水电网)
+
+3. 持续监控（"巡楼"工作）
+- 每10秒检查Pod健康状态
+- 每20秒上报Node状态给API Server
+- 实时监控资源使用情况
+- 处理Pod的重启和故障恢复
+
+节点状态上报（楼栋情况汇报）：kubelet定期向总务处汇报节点的实时状态
+
+容器运行时管理（设施设备管理）：kubelet不直接管理容器，而是通过CRI（Container Runtime Interface）与Docker、containerd等容器运行时交互，就像维护员不直接修电器，而是找专业的电工师傅。
+工作分工：
+- kubelet：负责Pod级别的管理和调度
+- 容器运行时：负责具体的容器创建和管理
+- 就像：维护员负责整体规划，电工师傅负责具体施工
+
+kubelet就像K8S大学里最勤劳的设施维护员——虽然不在管理层，但承担着最核心的执行工作。它们默默地管理着每个Node上的Pod，确保学生们（容器）能够正常"入住"和"生活"。理解kubelet的基本职责和工作流程，是掌握K8s运行机制的关键！
+
+----- English
+
+Chapter 22: kubelet Basics: The Diligent Facility Managers of K8S University 🔧
+
+Hello everyone! We've previously met the various management departments of K8S University. Today, let's get to know an unsung but extremely important role: kubelet, the diligent facility managers responsible for the daily operations and maintenance of each dormitory building on campus.
+
+1️⃣ What is kubelet? ❓
+
+Imagine K8S University has many dormitory buildings (Worker Nodes), and each building needs a dedicated facility manager to handle:
+👉 Check room status: Which rooms are occupied and which are vacant
+👉 Maintain infrastructure: Ensure water, electricity, network, AC, and heating are working properly
+👉 Execute management directives: Handle various tasks assigned by the General Affairs Office
+👉 Report building status: Regularly report building conditions to the General Affairs Office
+
+kubelet is exactly this kind of facility manager, running on each Worker Node and responsible for Pod lifecycle management on that Node.
+
+2️⃣ kubelet's Core Responsibilities and Workflow 🎯
+
+Pod Lifecycle Management (Dormitory Room Management)
+
+When kubelet receives instructions from the API Server (General Affairs Office) to create a pod:
+
+```yaml
+# Housing assignment from General Affairs Office
+apiVersion: v1
+kind: Pod
+metadata:
+  name: student-k8s
+spec:
+  containers:
+  - name: student
+    image: college-student:v1.0
+    resources:
+      requests:
+        memory: "1Gi"
+        cpu: "0.5"
+```
+
+1. Receive Tasks
+- Get Pod specifications from API Server
+- Check if the Pod already exists locally
+- Compare desired state with actual state
+
+2. Execute Tasks (when creating a new Pod)
+- Pull container images (prepare living supplies)
+- Create Pod sandbox (allocate room)
+- Start Init containers (room preprocessing)
+- Start main containers (student move-in)
+- Configure network and storage (connect utilities)
+
+3. Continuous Monitoring ("Building Patrol" Work)
+- Check Pod health status every 10 seconds
+- Report Node status to API Server every 20 seconds
+- Monitor resource usage in real-time
+- Handle Pod restarts and failure recovery
+
+Node Status Reporting (Building Status Reports): kubelet regularly reports the real-time status of nodes to the General Affairs Office
+
+Container Runtime Management (Equipment Management): kubelet doesn't directly manage containers but interacts with container runtimes like Docker and containerd through CRI (Container Runtime Interface), just like how facility managers don't directly fix electrical equipment but call professional electricians.
+
+Division of Labor:
+- kubelet: Responsible for Pod-level management and coordination
+- Container runtime: Responsible for specific container creation and management
+- Analogy: Facility manager handles overall planning; electrician handles specific implementation
+
+kubelet is like the most diligent facility manager at K8S University - while not part of the management hierarchy, it carries out the most critical execution work. It silently manages Pods on each Node, ensuring students (containers) can properly "move in" and "live." Understanding kubelet's basic responsibilities and workflow is key to mastering K8s operational mechanisms!
+
+*Remember: In the K8s world, kubelet is the crucial bridge connecting the control plane with actual workloads - it's the true "executor"!* 🔧✨
+
+
+章节23: kubelet配置与管理篇：维护员的工作手册 📋
+
+大家好！上一章我们了解了kubelet这位勤劳的设施维护员的基本职责，今天来深入了解维护员是如何"上岗"的——从系统服务配置到工作参数设置，这些都是让kubelet正常工作的关键！
+1️⃣ kubelet的系统服务身份 🔧
+kubelet的双重身份：
+虽然kubelet管理着容器化的Pod，但它自己却是"原住民"——直接运行在宿主机上的系统服务：
+
+```bash
+# kubelet作为systemd服务运行
+systemctl status kubelet
+# ● kubelet.service - kubelet: The Kubernetes Node Agent
+#    Loaded: loaded (/lib/systemd/system/kubelet.service; enabled)
+#    Active: active (running) since Mon 2024-01-15 09:00:00 UTC; 10 days ago
+
+# 查看服务配置文件
+cat /lib/systemd/system/kubelet.service
+# [Unit]
+# Description=kubelet: The Kubernetes Node Agent
+# After=docker.service
+#
+# [Service]
+# ExecStart=/usr/bin/kubelet \
+#   --config=/var/lib/kubelet/config.yaml \
+#   --kubeconfig=/etc/kubernetes/kubelet.conf
+# Restart=always
+```
+
+形象比喻：
+- kubelet程序 = 维护员这个人（提前招聘好的员工）
+- systemd服务 = 维护员的工作岗位（确保他按时上班）
+- 配置文件 = 维护员的工作手册（告诉他具体怎么干活）
+
+2️⃣ kubelet的配置文件体系：维护员的"工具箱" 📁
+kubelet有一套完整的配置文件"家族"：
+主配置文件：记录着所有的工作规范和标准。这个文件告诉kubelet该怎么工作，比如监听哪个端口，健康检查怎么做。
+认证配置文件：用来证明身份的"工作证件"，确保能和总务处（API Server）正常沟通。没有这个证件，它哪儿都去不了。
+Static Pod目录：存放着"特殊住户"的档案，维护员不需要通过总务处分配可以直接安排他们入住。
+工作目录和日志目录：记录着日常的工作情况和各种事件。
+
+3️⃣ 资源管理配置：维护员的"精打细算"艺术 💰
+kubelet必须学会"精打细算"，就像管理宿舍楼一样，不能把所有资源都分给Pod：
+系统资源预留：为操作系统的基础进程预留CPU和内存。不然系统进程"饿死"了，整栋楼都要停摆。
+K8s组件资源预留：kubelet自己也要"吃饭"，还有其他K8s组件也需要资源。
+驱逐策略：当资源紧张时，kubelet就像严格的宿管阿姨：
+- 硬驱逐：情况紧急时，立即让学生搬走，就像火灾时的紧急疏散
+- 软驱逐：给学生时间收拾行李，优雅地搬离，就像期末宿舍调整
+
+4️⃣ Pod管理配置：宿舍管理的"黄金法则" 🏠
+作为宿舍楼的管理员，kubelet需要制定一些基本的管理规则：
+住户数量限制：每栋宿舍楼最多110个Pod，每个CPU核心最多管理10个Pod。就像宿舍楼有消防安全限制一样。
+进程数量控制：每个住户（Pod）最多运行4096个进程。就像宿舍里不能养太多宠物一样。
+巡楼频率：维护员每分钟巡楼一次，每10秒更新节点状态，每5分钟向总务处汇报。
+日志管理：每个容器日志文件最大10MB，最多保留5个，避免占用过多存储空间。
+
+从基本的通信方式到资源管理策略，从安全认证到日志记录，合理的配置是kubelet高效工作的基础，也是整个K8s集群稳定运行的保障！
+
+章节24: kubelet运维实战篇：维护员的进阶技能 🛠️
+
+大家好！前面我们了解了kubelet的基本职责和配置方法，今天来学习维护员的"进阶技能"——Static Pod管理、故障排查、监控告警等实战技巧。这些技能是成为K8s运维专家的必备武器！
+
+1️⃣ Static Pod：特殊住户管理 👑
+
+什么是Static Pod？
+Static Pod是kubelet直接管理的特殊Pod，不经过API Server调度，就像宿舍楼里的"常住管理员"：
+
+```yaml
+# Static Pod示例 - 放在 /etc/kubernetes/manifests/ 目录
+# /etc/kubernetes/manifests/my-static-pod.yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: my-static-pod
+  namespace: kube-system
+  labels:
+    component: my-component
+spec:
+  containers:
+  - name: web-server
+    image: nginx:1.20
+    ports:
+    - containerPort: 80
+    resources:
+      requests:
+        memory: "64Mi"
+        cpu: "50m"
+      limits:
+        memory: "128Mi"
+        cpu: "100m"
+```
+
+Static Pod的特殊权限：
+👉 直接管理：kubelet直接监控，不经过Scheduler
+👉 自动重启：Pod挂了kubelet会立即重启，比普通住户更"特权"
+👉 删除保护：无法通过kubectl删除，只能删除manifest文件
+👉 节点绑定：永远运行在特定节点上，不会被调度到其他地方
+
+常见应用场景：
+```bash
+# 控制平面组件（Master节点）
+ls /etc/kubernetes/manifests/
+# etcd.yaml                    # 数据库服务
+# kube-apiserver.yaml         # API服务器
+# kube-controller-manager.yaml # 控制器管理器
+# kube-scheduler.yaml         # 调度器
+
+# 系统级服务（Worker节点）
+# kube-proxy.yaml             # 网络代理
+# monitoring-agent.yaml       # 监控代理
+```
+
+重要提醒：kubelet本身不是Static Pod！它是运行在宿主机上的系统服务，就像宿舍楼的"原住民管理员"。
+
+2️⃣ 故障排查实战：维护员的诊断技能 🔍
+
+常见问题场景与排查：
+
+问题1：Pod一直处于Pending状态
+```bash
+# 查看Pod详细信息
+kubectl describe pod problematic-pod
+# Events:
+# Warning  FailedScheduling  pod has unbound immediate PersistentVolumeClaims
+
+# 排查步骤
+1. 检查存储卷状态：kubectl get pv,pvc
+2. 确认Node资源充足：kubectl describe node
+3. 查看调度器日志：kubectl logs -n kube-system kube-scheduler-xxx
+4. 检查污点和容忍：kubectl get nodes -o yaml | grep -A5 -B5 taint
+```
+
+问题2：Pod频繁重启（CrashLoopBackOff）
+```bash
+# 查看Pod状态
+kubectl get pods
+# NAME        READY   STATUS             RESTARTS   AGE
+# my-app      0/1     CrashLoopBackOff   5          10m
+
+# 排查步骤
+1. 查看Pod日志：kubectl logs my-app --previous
+2. 查看Pod事件：kubectl describe pod my-app
+3. 检查健康检查配置：kubectl get pod my-app -o yaml | grep -A10 livenessProbe
+4. 进入容器调试：kubectl exec -it my-app -- /bin/sh
+```
+
+问题3：Node状态NotReady
+```bash
+# 查看Node状态
+kubectl get nodes
+# NAME           STATUS     ROLES    AGE
+# worker-node-1  NotReady   worker   10d
+
+# 排查步骤
+1. 检查kubelet服务：systemctl status kubelet
+2. 查看kubelet日志：journalctl -u kubelet -f
+3. 检查网络连通性：ping <api-server-ip>
+4. 查看系统资源：df -h && free -h
+5. 检查容器运行时：systemctl status containerd
+```
+
+3️⃣ 监控指标：维护员的仪表盘 📊
+
+核心监控指标：
+```bash
+# Pod相关指标
+kubelet_running_pods{node="worker-1"}           # 运行中的Pod数量
+kubelet_pod_start_duration_seconds              # Pod启动耗时
+kubelet_pod_worker_duration_seconds             # Pod工作耗时
+
+# 资源相关指标
+kubelet_node_cpu_usage_seconds_total            # CPU使用情况
+kubelet_node_memory_working_set_bytes           # 内存使用情况
+kubelet_volume_stats_used_bytes                 # 存储卷使用情况
+
+# 容器运行时指标
+kubelet_runtime_operations_total                # 容器操作次数
+kubelet_runtime_operations_duration_seconds     # 容器操作耗时
+kubelet_runtime_operations_errors_total         # 容器操作错误次数
+
+# 网络相关指标
+kubelet_cgroup_manager_duration_seconds         # cgroup管理耗时
+kubelet_pleg_relist_duration_seconds           # PLEG重新列举耗时
+```
+
+告警规则配置：
+```yaml
+# kubelet关键告警规则
+groups:
+- name: kubelet-alerts
+  rules:
+  # kubelet服务异常
+  - alert: KubeletDown
+    expr: up{job="kubelet"} == 0
+    for: 5m
+    labels:
+      severity: critical
+    annotations:
+      summary: "Kubelet is down on node {{$labels.node}}"
+
+  # Pod启动缓慢
+  - alert: PodStartupSlow
+    expr: kubelet_pod_start_duration_seconds > 60
+    for: 2m
+    labels:
+      severity: warning
+    annotations:
+      summary: "Pod startup is taking too long on {{$labels.node}}"
+
+  # 节点资源不足
+  - alert: NodeResourceExhaustion
+    expr: kubelet_node_memory_working_set_bytes / kubelet_node_memory_capacity_bytes > 0.9
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: "Node {{$labels.node}} memory usage is above 90%"
+```
+
+4️⃣ 性能优化：让维护员更高效 ⚡
+
+资源优化配置：
+```yaml
+# 性能优化配置
+maxPods: 110                    # 根据节点规格调整
+podsPerCore: 10                 # 避免单核负载过重
+kubeAPIQPS: 50                  # 根据集群规模调整
+kubeAPIBurst: 100               # 处理突发请求
+
+# 并发控制
+maxParallelImagePulls: 5        # 并发拉取镜像数
+serializeImagePulls: false      # 允许并发拉取
+
+# 垃圾回收优化
+imageGCHighThresholdPercent: 85 # 镜像GC高阈值
+imageGCLowThresholdPercent: 80  # 镜像GC低阈值
+imageMinimumGCAge: 2m          # 镜像最小GC年龄
+```
+
+系统调优：
+```bash
+# 系统级优化
+# 增加文件描述符限制
+echo "* soft nofile 65536" >> /etc/security/limits.conf
+echo "* hard nofile 65536" >> /etc/security/limits.conf
+
+# 优化内核参数
+echo "net.core.somaxconn = 32768" >> /etc/sysctl.conf
+echo "net.ipv4.ip_local_port_range = 1024 65000" >> /etc/sysctl.conf
+sysctl -p
+```
+
+5️⃣ 日志管理与调试：维护员的记录本 📝
+
+日志配置优化：
+```bash
+# kubelet日志配置
+--log-file-max-size=100         # 单个日志文件最大100MB
+--log-max-files=5               # 最多保留5个日志文件
+--v=2                           # 日志级别（0-10，2为推荐值）
+--log-flush-frequency=5s        # 日志刷新频率
+```
+
+常用调试命令：
+```bash
+# 查看kubelet状态
+systemctl status kubelet
+systemctl is-active kubelet
+
+# 查看kubelet日志
+journalctl -u kubelet -f                    # 实时日志
+journalctl -u kubelet --since "1 hour ago" # 最近1小时日志
+journalctl -u kubelet -p err               # 只看错误日志
+
+# 检查kubelet配置
+kubelet --help | grep config
+kubelet --print-join-defaults
+
+# 查看Node详细信息
+kubectl describe node <node-name>
+kubectl get node <node-name> -o yaml
+
+# 检查系统资源
+df -h                           # 磁盘使用情况
+free -h                         # 内存使用情况
+top -p $(pgrep kubelet)         # kubelet进程资源使用
+```
+
+6️⃣ 最佳实践：维护员的经验总结 💡
+
+安全最佳实践：
+```yaml
+# 安全配置建议
+readOnlyPort: 0                 # 禁用只读端口
+authentication:
+  webhook:
+    enabled: true               # 启用认证
+authorization:
+  mode: Webhook                 # 启用授权
+protectKernelDefaults: true     # 保护内核默认值
+```
+
+运维最佳实践：
+```bash
+# 定期维护任务
+1. 监控磁盘空间使用情况
+2. 定期清理无用镜像：docker system prune
+3. 检查kubelet日志大小
+4. 验证Static Pod配置
+5. 测试节点网络连通性
+
+# 应急预案
+1. 准备kubelet配置备份
+2. 建立节点快速替换流程
+3. 制定Pod迁移策略
+4. 准备常用调试工具
+```
+
+容量规划建议：
+```yaml
+# 资源预留建议（根据节点规格调整）
+# 小型节点（2核4GB）
+systemReserved:
+  cpu: "100m"
+  memory: "500Mi"
+
+# 中型节点（4核8GB）
+systemReserved:
+  cpu: "200m"
+  memory: "1Gi"
+
+# 大型节点（8核16GB）
+systemReserved:
+  cpu: "300m"
+  memory: "2Gi"
+```
+
+一句话总结 🎯
+
+掌握kubelet的运维实战技能，就像培养一个经验丰富的资深维护员——不仅要会基本操作，还要能处理各种突发情况，优化性能，预防问题。Static Pod管理、故障排查、监控告警、性能优化这些技能，是成为K8s运维专家的核心竞争力！
+
+*记住：kubelet的稳定运行是整个K8s集群健康的基石，掌握这些实战技能让你在运维路上游刃有余！* 🛠️✨
+
