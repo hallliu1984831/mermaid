@@ -1,3 +1,4 @@
+----- Chinese
 # 小李的困惑：这个PromQL的查询语句对不上啊
 
 ## 故事背景：
@@ -128,3 +129,151 @@ TIPS:
 
 ## 9. 小结
 这次需求本身不复杂，但它很像 SRE 日常里那些“看似只是写个查询，实际是在做数据对齐”的工作。PromQL 只是最后落笔的那一步。
+
+----- English
+# Mike's Confusion: These PromQL Queries Just Don't Match Up!
+
+## Background
+
+One afternoon, close to the end of the workday, Mike received a request from the product team:
+- Add a new Grafana dashboard to display VM disk usage
+- The VMs shown need to be filtered by "data center cluster" criteria
+
+Mike thought: "Isn't this just specifying a metric to display a data table? Doesn't seem too complex." So Mike confidently replied: "I'll get this ready and submitted ASAP!"
+
+## Rolling Up the Sleeves
+
+The next day, Mike started implementing this requirement according to his plan. Based on his understanding, Mike outlined the implementation process:
+1. Search for disk usage metrics in Prometheus and select the most suitable object for displaying disk usage
+2. Use Grafana's variable functionality to implement data center cluster filtering
+3. Use Grafana's table functionality to display the disk usage data table
+
+After listing all this out, Mike found the entire implementation process was indeed not complex, so he rolled up his sleeves and started working with full confidence.
+
+## 2. Running Into a Small Problem
+
+After some searching, Mike found the disk_used metric, example as follows:
+```
+disk_used{device="vda1", fstype="xfs", host="DC01-VM-001:6379", host_alias="DC01-VM-001", mode="rw", path="/", DC="DC01"} 3000000000
+....
+
+```
+At first glance, this metric was exactly the disk usage he needed. But Mike discovered that this metric didn't have the "data center cluster" filtering condition, causing the query results to show disk usage from all data centers. However, the product team's requirement was: only display filtered disk usage.
+
+Mike thought: "If only I could add a cluster label to this disk_used metric, wouldn't that solve it?"
+
+## 3. How to Add This Cluster Label?
+
+To add a cluster label to the disk_used metric, Mike first needed to figure out how this metric was defined. Following this lead, Mike started reverse engineering:
+1. This metric has no job label, meaning this metric isn't collected through Prometheus-defined jobs that poll data periodically
+2. Checking Prometheus targets, he confirmed there was no corresponding scrape job, further verifying that the data wasn't collected through periodic scraping
+3. Since the data wasn't being pulled, there was only one possibility left: this data was pushed through pushgateway
+
+At this point, Mike thought: "This should be easy! Find the program that pushes this data, then add a cluster label in the program, right?" But where was this data-pushing program? Prometheus serves the entire data center - in this vast sea of machines, where would he even start looking?
+
+TIPS:
+1. Prometheus generally collects data using the poll method, periodically polling data according to configured jobs
+2. Prometheus also supports pushgateway to receive pushed data. Pushgateway is an HTTP service that receives data pushed by applications, then Prometheus periodically polls data from pushgateway
+
+## 4. Where to Find the Data-Pushing Program?
+
+Mike thought: "I should ask in our work chat - that should get me some useful answers!" Just as he was about to ask colleagues, he caught sight of this content:
+```
+host="DC01-VM-001:6379"
+```
+He thought: "This 6379 port looks familiar... where have I seen it before? Wait, isn't this telegraf's scanning port?" Thinking of this, Mike quickly checked the documentation to verify, and indeed it was telegraf's collection port, so this metric was collected by telegraf.
+
+With this clue, Mike quickly drew conclusions from the documentation:
+1. Telegraf is a data collection program installed on all VMs in the data center. It scans data on the VM according to configuration and pushes it to pushgateway, which then saves it to Prometheus
+2. Data collected by telegraf is tagged with a host label, and this host label is the hostname of the machine where telegraf is located
+3. Both host and host_alias are collected by telegraf, but telegraf's collected host includes the port, while host_alias doesn't include the port
+
+Having found the source of the data, Mike suddenly realized: "With so many VMs in the data center, each VM has a telegraf - I can't possibly modify them one by one, right? What should I do?"
+
+TIPS:
+1. Telegraf is a mainstream data collection program currently
+2. Telegraf can collect various data from the VM it's on, such as CPU, memory, disk, network data, etc.
+
+## 5. Can We Actually Modify Telegraf's Configuration?
+
+After further communication with colleagues, Mike concluded that modifying telegraf's configuration to add a new label wasn't the best solution for the following reasons:
+1. Telegraf's configuration files are on each VM and distributed through Ansible. To modify them, you'd have to modify Ansible's configuration and then distribute it to each VM - this process can't be completed quickly
+2. As data center VMs, they don't know which cluster they belong to. This information isn't collected by telegraf and needs to be set manually, which is difficult to do in Ansible scripts
+
+Mike felt awkward 😅. It seemed directly using the disk_used metric to complete this task would be challenging!
+
+## 6. Checking Cluster Metrics
+
+Mike thought: "Since metrics collected by telegraf don't have cluster labels, which metrics do have this cluster label?" With this question, based on the cluster name metric "DC_CLST" provided by the product team, Mike started searching in Prometheus. He quickly found the DC_CLST metric, example as follows:
+```
+DC_CLST{cluster="DC_CLST_01", host="DC01-VM-001"} 1
+```
+
+Seeing this, things became clear:
+Needed display metric:
+disk_used{device="vda1", fstype="xfs", host="DC01-VM-001:6379", host_alias="DC01-VM-001", mode="rw", path="/", DC="DC01"} 30000000000
+
+Needed filter metric:
+DC_CLST{cluster="DC_CLST_01", host="DC01-VM-001"} 1
+
+Both metrics have host fields that can serve as join conditions. It looked like the task was about to be completed:
+disk_used * on (host) DC_CLST{cluster="DC_CLST_01"}
+
+Wait, Mike suddenly realized that the host values in these two metrics were actually different! One is DC01-VM-001:6379, the other is DC01-VM-001. Just when one problem was solved, another arose - still not resolved!
+
+## 7. Continuing to Find Solutions
+
+Mike thought: "Although the host field values in the two metrics are different, the host_alias field value in disk_used is the same as the host field value in DC_CLST. Could I use the host_alias field as the join condition?"
+
+After some investigation, Mike discovered: in Prometheus query syntax, using the on join syntax requires that the related fields in both metrics must have the same name, but the related field names in disk_used and DC_CLST were inconsistent. This path seemed blocked too!
+
+After more pondering, Mike came up with a solution. His final approach was:
+
+1. First process `disk_used`
+2. Copy the content from `host_alias` to a unified `host`, essentially overwriting the original `host` and removing the port number
+3. Then join with `DC_CLST` using `on(...)`
+
+His core reasoning was:
+Rather than parsing `host="DC01-VM-001:1234"`, it's better to directly use the existing `host_alias`. Since `host_alias` is already a clean value without ports, it's lower risk and more stable.
+
+The most crucial operation here is copying the `host_alias` from `disk_used` to create a `host` that can be used for joining.
+
+```promql
+label_replace((disk_used),"host","$1","host_alias","(.*)")
+```
+
+This expression means:
+
+- Read content from `host_alias`
+- Extract it using regex `(.*)`
+- Write the extracted result to a new `host` label
+
+After processing, the two metrics could finally be aligned. Here's the final submitted version:
+```
+label_replace(disk_used, "host", "$1", "host_alias", "(.*)")
+* on(host)
+DC_CLST{cluster="DC_CLST_01"}
+```
+The task could finally be completed.
+
+TIPS:
+1. Usage of label_replace() function: label_replace(v instant-vector, destination_label string, replacement string, source_label string, regex string)
+2. Usage of on() syntax: on(label_name [, label_name]), used to join two metrics, requires both metrics to have same-name labels with equal values. If there are no same-name labels, you can use the label_replace() function to add a same-name label.
+3. Data on both sides of label joins must be single records; if one side has multiple records, filter to single record, for example using the avg() function.
+4. The purpose of on() is to use the latter metric to perform data filtering
+
+## 8. Mike's Retrospective
+
+From an SRE perspective, this requirement was small but particularly typical. It reminds us of several things:
+- Before writing queries, look at labels first - don't rush to use functions
+- Whether you can `join` fundamentally depends on whether labels can be aligned
+- Same-name labels don't equal same-meaning data
+- If standard fields already exist, prioritize using standard fields - don't repeat string parsing
+- Many monitoring system problems aren't "can't query," but rather "inconsistent data modeling"
+
+In other words:
+- Query language solves "how to calculate"
+- Label design solves "whether you can calculate"
+
+## 9. Summary
+This requirement itself wasn't complex, but it's very much like those SRE daily tasks that "seem like just writing a query, but are actually about data alignment." PromQL is just the final step of putting pen to paper.
