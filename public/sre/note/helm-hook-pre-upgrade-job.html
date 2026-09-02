@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Helm Hook 升级前执行 Job</title>
+  <script type="module">
+    import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: "base",
+      themeVariables: {
+        background: "#f8fafc",
+        primaryColor: "#e0f2fe",
+        primaryTextColor: "#0f172a",
+        primaryBorderColor: "#0284c7",
+        lineColor: "#0284c7",
+        secondaryColor: "#dcfce7",
+        tertiaryColor: "#f8fafc",
+        fontFamily: "ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+        fontSize: "18px"
+      }
+    });
+  </script>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #f8fafc;
+      color: #0f172a;
+      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    .card {
+      width: min(940px, 92vw);
+      padding: 44px 44px 36px;
+      background: #ffffff;
+      border: 1px solid #dbeafe;
+      border-radius: 18px;
+      box-shadow: 0 24px 70px rgba(15, 23, 42, 0.08);
+    }
+
+    .title {
+      margin: 0 0 10px;
+      font-size: 34px;
+      line-height: 1.15;
+      letter-spacing: 0;
+      font-weight: 800;
+    }
+
+    .subtitle {
+      margin: 0 0 28px;
+      color: #475569;
+      font-size: 18px;
+    }
+
+    .command {
+      margin: 0 0 28px;
+      padding: 18px 22px;
+      border-radius: 12px;
+      background: #0f172a;
+      color: #e2e8f0;
+      font-size: 22px;
+      line-height: 1.35;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      white-space: nowrap;
+      overflow-x: auto;
+    }
+
+    .mermaid {
+      display: flex;
+      justify-content: center;
+      margin-top: 8px;
+    }
+
+    .tip {
+      margin: 28px 0 0;
+      padding: 16px 18px;
+      border-radius: 12px;
+      background: #f0fdf4;
+      color: #166534;
+      font-size: 18px;
+      font-weight: 650;
+    }
+  </style>
+</head>
+<body>
+  <main class="card">
+    <h1 class="title">Helm Hook：升级前先跑一个 Job</h1>
+    <p class="subtitle">用 pre-upgrade 在 Helm 更新主资源前，先执行数据库迁移等前置动作。</p>
+
+    <pre class="command">annotations:
+  "helm.sh/hook": pre-upgrade</pre>
+
+    <div class="mermaid">
+flowchart LR
+  A["helm upgrade"]
+  B["pre-upgrade hook<br/>运行 db-migrate Job"]
+  C{"Job 成功 ?"}
+  D["继续升级<br/>Deployment / Service"]
+  E["停止发布<br/>排查迁移失败"]
+
+  A --> B
+  B --> C
+  C -- yes --> D
+  C -- no --> E
+
+  classDef start fill:#eff6ff,stroke:#0284c7,stroke-width:2px,color:#0f172a;
+  classDef hook fill:#fef9c3,stroke:#ca8a04,stroke-width:2px,color:#713f12;
+  classDef success fill:#dcfce7,stroke:#16a34a,stroke-width:2px,color:#14532d;
+  classDef stop fill:#fee2e2,stroke:#dc2626,stroke-width:2px,color:#7f1d1d;
+  classDef judge fill:#f8fafc,stroke:#64748b,stroke-width:2px,color:#334155;
+
+  class A start;
+  class B hook;
+  class C judge;
+  class D success;
+  class E stop;
+    </div>
+
+    <p class="tip">一句话：Helm hook 是发布流程里的前置动作或后置动作。</p>
+  </main>
+</body>
+</html>

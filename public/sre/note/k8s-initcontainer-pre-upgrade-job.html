@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>K8S Pod initContainer 升级前执行 Job</title>
+  <script type="module">
+    import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: "base",
+      themeVariables: {
+        background: "#f8fafc",
+        primaryColor: "#e0f2fe",
+        primaryTextColor: "#0f172a",
+        primaryBorderColor: "#0284c7",
+        lineColor: "#0284c7",
+        secondaryColor: "#dcfce7",
+        tertiaryColor: "#f8fafc",
+        fontFamily: "ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+        fontSize: "18px"
+      }
+    });
+  </script>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #f8fafc;
+      color: #0f172a;
+      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    .card {
+      width: min(940px, 92vw);
+      padding: 44px 44px 36px;
+      background: #ffffff;
+      border: 1px solid #dbeafe;
+      border-radius: 18px;
+      box-shadow: 0 24px 70px rgba(15, 23, 42, 0.08);
+    }
+
+    .title {
+      margin: 0 0 10px;
+      font-size: 34px;
+      line-height: 1.15;
+      letter-spacing: 0;
+      font-weight: 800;
+    }
+
+    .subtitle {
+      margin: 0 0 28px;
+      color: #475569;
+      font-size: 18px;
+    }
+
+    .command {
+      margin: 0 0 28px;
+      padding: 18px 22px;
+      border-radius: 12px;
+      background: #0f172a;
+      color: #e2e8f0;
+      font-size: 22px;
+      line-height: 1.35;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      white-space: nowrap;
+      overflow-x: auto;
+    }
+
+    .mermaid {
+      display: flex;
+      justify-content: center;
+      margin-top: 8px;
+    }
+
+    .tip {
+      margin: 28px 0 0;
+      padding: 16px 18px;
+      border-radius: 12px;
+      background: #f0fdf4;
+      color: #166534;
+      font-size: 18px;
+      font-weight: 650;
+    }
+
+    .section-title {
+      margin: 36px 0 14px;
+      font-size: 20px;
+      font-weight: 750;
+      color: #0f172a;
+    }
+
+    .compare-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 16px;
+    }
+
+    .compare-table th,
+    .compare-table td {
+      padding: 12px 16px;
+      text-align: left;
+      border: 1px solid #e2e8f0;
+    }
+
+    .compare-table th {
+      background: #f1f5f9;
+      color: #334155;
+      font-weight: 700;
+    }
+
+    .compare-table td:first-child {
+      color: #475569;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .same-box {
+      margin: 0;
+      padding: 16px 18px;
+      border-radius: 12px;
+      background: #eff6ff;
+      color: #0f172a;
+      font-size: 17px;
+      line-height: 1.55;
+    }
+
+    .compare-table code {
+      padding: 2px 6px;
+      border-radius: 6px;
+      background: #fee2e2;
+      color: #b91c1c;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      font-size: 15px;
+    }
+  </style>
+</head>
+<body>
+  <main class="card">
+    <h1 class="title">K8S Pod initContainer：升级前先跑一个 Job</h1>
+    <p class="subtitle">Pod 每次启动前，先跑 initContainer 做前置检查或初始化，成功后主容器才会启动。</p>
+
+    <pre class="command">initContainers:
+  - name: wait-for-db</pre>
+
+    <div class="mermaid">
+flowchart LR
+  A["Pod 创建 / 重启"]
+  B["initContainer<br/>wait-for-db"]
+  C{"退出码 = 0 ?"}
+  D["启动主容器<br/>my-app"]
+  E["重试 initContainer<br/>按 restartPolicy"]
+
+  A --> B
+  B --> C
+  C -- yes --> D
+  C -- no --> E
+  E --> B
+
+  classDef start fill:#eff6ff,stroke:#0284c7,stroke-width:2px,color:#0f172a;
+  classDef hook fill:#fef9c3,stroke:#ca8a04,stroke-width:2px,color:#713f12;
+  classDef success fill:#dcfce7,stroke:#16a34a,stroke-width:2px,color:#14532d;
+  classDef stop fill:#fee2e2,stroke:#dc2626,stroke-width:2px,color:#7f1d1d;
+  classDef judge fill:#f8fafc,stroke:#64748b,stroke-width:2px,color:#334155;
+
+  class A start;
+  class B hook;
+  class C judge;
+  class D success;
+  class E stop;
+    </div>
+
+    <p class="tip">一句话：initContainer 是 Pod 生命周期里的前置动作，Pod 被重新创建时会重新跑一遍。</p>
+
+    <h2 class="section-title">和 Helm Hook 的相同点</h2>
+    <p class="same-box">两者要解决的问题很像：主流程正式开始前，先跑一段前置任务，成功了才继续，失败了就停止。Helm Hook（pre-upgrade）和 initContainer 都是这个思路的实现，只是站的层级不一样。</p>
+
+    <h2 class="section-title">和 Helm Hook 的区别</h2>
+    <table class="compare-table">
+      <thead>
+        <tr>
+          <th>对比项</th>
+          <th>Helm Hook</th>
+          <th>initContainer</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>实现位置</td>
+          <td>Helm 发布流程</td>
+          <td>Pod 定义内部</td>
+        </tr>
+        <tr>
+          <td>触发方式</td>
+          <td>helm install / helm upgrade 等</td>
+          <td>Pod 被创建时</td>
+        </tr>
+        <tr>
+          <td>Kubernetes 对象</td>
+          <td>通常是独立的 Job</td>
+          <td>Pod 里的特殊容器</td>
+        </tr>
+        <tr>
+          <td>生命周期</td>
+          <td>由 Helm 管理</td>
+          <td>由 Pod 管理</td>
+        </tr>
+        <tr>
+          <td>适合场景</td>
+          <td>数据库迁移、发布前检查</td>
+          <td>等待依赖、初始化文件、启动前检查</td>
+        </tr>
+        <tr>
+          <td>执行失败的影响</td>
+          <td>Hook Job 失败，Helm 按 hook 类型判定发布是否失败</td>
+          <td>主容器无法启动，Pod 状态显示为 <code>Init:Error</code></td>
+        </tr>
+      </tbody>
+    </table>
+  </main>
+</body>
+</html>

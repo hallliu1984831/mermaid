@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FluxCD 从 Git 到 Pod 的链路</title>
+  <script type="module">
+    import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: "base",
+      themeVariables: {
+        background: "#f8fafc",
+        primaryColor: "#e0f2fe",
+        primaryTextColor: "#0f172a",
+        primaryBorderColor: "#0284c7",
+        lineColor: "#0284c7",
+        secondaryColor: "#dcfce7",
+        tertiaryColor: "#f8fafc",
+        fontFamily: "ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+        fontSize: "18px"
+      }
+    });
+  </script>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #f8fafc;
+      color: #0f172a;
+      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    .card {
+      width: min(980px, 92vw);
+      padding: 44px 44px 36px;
+      background: #ffffff;
+      border: 1px solid #dbeafe;
+      border-radius: 18px;
+      box-shadow: 0 24px 70px rgba(15, 23, 42, 0.08);
+    }
+
+    .title {
+      margin: 0 0 10px;
+      font-size: 34px;
+      line-height: 1.15;
+      letter-spacing: 0;
+      font-weight: 800;
+    }
+
+    .subtitle {
+      margin: 0 0 28px;
+      color: #475569;
+      font-size: 18px;
+    }
+
+    .command {
+      margin: 0 0 28px;
+      padding: 18px 22px;
+      border-radius: 12px;
+      background: #0f172a;
+      color: #e2e8f0;
+      font-size: 22px;
+      line-height: 1.35;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      white-space: pre;
+      overflow-x: auto;
+    }
+
+    .mermaid {
+      display: flex;
+      justify-content: center;
+      margin-top: 8px;
+    }
+
+    .tip {
+      margin: 28px 0 0;
+      padding: 16px 18px;
+      border-radius: 12px;
+      background: #f0fdf4;
+      color: #166534;
+      font-size: 18px;
+      font-weight: 650;
+    }
+  </style>
+</head>
+<body>
+  <main class="card">
+    <h1 class="title">FluxCD 不是 Git 直接到 Pod</h1>
+    <p class="subtitle">发布问题要沿着链路看：哪一层还是旧的，问题通常就卡在哪一层附近。</p>
+
+    <pre class="command">GitRepository -> Kustomization -> HelmRepository
+-> HelmChart -> HelmRelease -> Deployment / Pod</pre>
+
+    <div class="mermaid">
+flowchart LR
+  A["GitRepository<br/>拉 Git commit"]
+  B["Kustomization<br/>应用 Git 配置"]
+  C["HelmRepository<br/>读取 index.yaml"]
+  D["HelmChart<br/>解析 chart version"]
+  E["HelmRelease<br/>执行 Helm 发布"]
+  F["Deployment / Pod<br/>最终运行结果"]
+
+  A --> B
+  B --> C
+  C --> D
+  D --> E
+  E --> F
+
+  classDef git fill:#eff6ff,stroke:#0284c7,stroke-width:2px,color:#0f172a;
+  classDef helm fill:#fef9c3,stroke:#ca8a04,stroke-width:2px,color:#713f12;
+  classDef run fill:#dcfce7,stroke:#16a34a,stroke-width:2px,color:#14532d;
+
+  class A,B git;
+  class C,D,E helm;
+  class F run;
+    </div>
+
+    <p class="tip">一句话：FluxCD 排查发布问题，先看链路，不要只盯 Pod。</p>
+  </main>
+</body>
+</html>
