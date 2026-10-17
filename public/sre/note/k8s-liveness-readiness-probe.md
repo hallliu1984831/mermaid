@@ -8,9 +8,6 @@
 
 我解释的原因是：上游服务的 `livenessProbe`，把下游服务是否可用也算进了检查。虽然有小伙伴认为不应该发生这样的错误，但它确实会发生，而且 Spring Boot 官方文档也专门提醒过这种风险：
 
-![Spring Boot 官方文档：liveness 不应依赖外部系统](./k8s-liveness-external-state.png)
-
-> 来源：[Spring Boot Reference Documentation](https://docs.spring.io/spring-boot/reference/actuator/endpoints.html#actuator.endpoints.kubernetes-probes.external-state)
 
 这张图正好对应了一种可能的解释：如果上游服务把外部依赖放进 `livenessProbe`，下游故障就可能触发上游实例重启，并沿着依赖链继续放大，引发级联失败。
 
@@ -59,7 +56,7 @@ readinessProbe 失败
   -> RESTARTS 不增加
 ```
 
-这时候 `kubectl get pod` 看到的状态更可能是：
+这时候 `kubectl get pod` 看到的这个 pod 的状态更可能是：
 
 ```text
 NAME        READY   STATUS    RESTARTS
@@ -78,7 +75,7 @@ my-app      0/1     Running   0
 
 这个接口不仅检查当前进程，还可能检查数据库、Redis、消息队列和其他下游服务。
 
-如果 livenessProbe 和 readinessProbe 都使用它：
+如果服务部署的 yaml 文件中 livenessProbe 和 readinessProbe 都使用它，如下所示：
 
 ```yaml
 livenessProbe:
@@ -129,16 +126,8 @@ readinessProbe:
 
 ## 一句话记住
 
-Liveness 问的是：
+Liveness 问的是：重启当前容器，能不能解决这个问题？
 
-```text
-重启当前容器，能不能解决这个问题？
-```
-
-Readiness 问的是：
-
-```text
-当前容器，现在该不该接收流量？
-```
+Readiness 问的是：当前容器，现在该不该接收流量？
 
 下游服务挂了，重启上游容器通常解决不了问题。所以，下游依赖不应该轻易放进 livenessProbe。
